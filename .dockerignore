@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+*.md
+.claude
+n8n_*.json
+kanbam.json
+exemplo_contatos.csv
+netlify.toml
+vercel.json
+_headers

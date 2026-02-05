@@ -1,0 +1,10 @@
+{
+  "stg": {
+    "name": "STG",
+    "apiUrl": "https://crm.closefy.ai",
+    "accountId": "1",
+    "apiToken": "MynsmRffQA3bkHBU6PZECtoo",
+    "createdAt": "2026-02-02T13:25:59.326Z",
+    "updatedAt": "2026-02-02T13:26:25.106Z"
+  }
+}

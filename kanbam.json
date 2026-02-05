@@ -1,0 +1,5938 @@
+{
+  "info": {
+    "_postman_id": "ba751be3-df46-41c6-b339-40ad922e6cc5",
+    "name": "Chatwoot API v4.9.1 - Complete Collection",
+    "description": "Complete API collection for Chatwoot v4.9.1 with AiFocus customizations.\n\n## Total: 51 API Categories\n\n## Authentication\n\nMost endpoints require authentication via API key in the header:\n- `api_access_token`: Your user or bot API token\n\n## Base URL\n- Production: `https://your-chatwoot-domain.com`\n- Development: `http://localhost:3000`\n\n## Variables\nSet these in your Postman environment:\n- `base_url`: Your Chatwoot instance URL\n- `api_access_token`: Your API token\n- `account_id`: Your account ID",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40206537"
+  },
+  "item": [
+    {
+      "name": "01. Authentication & Profile",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"contato@aifocus.dev\", \"password\": \"@Solar2023@\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/sign_in",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "sign_in"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"profile\": {\"name\": \"New Name\", \"availability\": \"online\"}}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Set Availability",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"availability\": \"online\", \"account_id\": 1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile/availability",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile", "availability"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Avatar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile/avatar",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile", "avatar"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Access Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/profile/reset_access_token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "profile", "reset_access_token"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02. Accounts",
+      "item": [
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"account_name\": \"My Company\", \"user_full_name\": \"John Doe\", \"email\": \"john@example.com\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Company Name\", \"locale\": \"pt_BR\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cache Keys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/cache_keys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "cache_keys"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03. Agents",
+      "item": [
+        {
+          "name": "List Agents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agents",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agents"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"New Agent\", \"email\": \"agent@example.com\", \"role\": \"agent\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agents",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agents"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agents/{{agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agents", "{{agent_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Agent",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Name\", \"role\": \"administrator\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agents/{{agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agents", "{{agent_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Agent",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agents/{{agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agents", "{{agent_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04. Contacts",
+      "item": [
+        {
+          "name": "List Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "contacts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/search?q=john",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "contacts", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "john"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contact",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/{{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "contacts", "{{contact_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"inbox_id\": 1, \"name\": \"John Doe\", \"email\": \"john@example.com\", \"phone_number\": \"+5511999999999\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "contacts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contact",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"John Updated\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/{{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "contacts", "{{contact_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Contact",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/{{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "contacts", "{{contact_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contact Labels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/{{contact_id}}/labels",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "contacts",
+                "{{contact_id}}",
+                "labels"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Merge Contacts",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"base_contact_id\": 1, \"mergee_contact_id\": 2}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/actions/contact_merge",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "actions", "contact_merge"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05. Contact Notes",
+      "item": [
+        {
+          "name": "List Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/{{contact_id}}/notes",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "contacts",
+                "{{contact_id}}",
+                "notes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\": \"Important note\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/{{contact_id}}/notes",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "contacts",
+                "{{contact_id}}",
+                "notes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/contacts/{{contact_id}}/notes/1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "contacts",
+                "{{contact_id}}",
+                "notes",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06. Conversations",
+      "item": [
+        {
+          "name": "List Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations?status=open&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "conversations"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "open"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/search?q=hello",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "conversations", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "hello"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"inbox_id\": 1, \"contact_id\": 1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "conversations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Toggle Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\": \"resolved\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/toggle_status",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "toggle_status"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"assignee_id\": 1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/assignments",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "assignments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Labels",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"labels\": [\"urgent\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/labels",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "labels"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07. Conversation Notes",
+      "item": [
+        {
+          "name": "List Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/notes",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "notes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\": \"Internal note\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/notes",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "notes"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08. Products",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/products",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Premium Plan\", \"price\": 99.99, \"quantity\": 1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/products",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "products",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09. Appointments",
+      "item": [
+        {
+          "name": "List Appointments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/appointments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "appointments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Product Demo\", \"scheduled_at\": \"2024-02-15T14:00:00Z\", \"duration\": 60}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/appointments",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "appointments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Appointment",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/appointments/1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "appointments",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Messages",
+      "item": [
+        {
+          "name": "List Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\": \"Hello!\", \"message_type\": \"outgoing\", \"private\": false}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Message",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/messages/{{message_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "messages",
+                "{{message_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11. Inboxes",
+      "item": [
+        {
+          "name": "List Inboxes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "inboxes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Inbox",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "inboxes", "{{inbox_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Inbox",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Website Chat\", \"channel\": {\"type\": \"web_widget\"}}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "inboxes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Inbox",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Updated Inbox\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "inboxes", "{{inbox_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Inbox",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "inboxes", "{{inbox_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12. Labels",
+      "item": [
+        {
+          "name": "List Labels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/labels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "labels"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Label",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"VIP\", \"color\": \"#FF5733\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/labels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "labels"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Label",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/labels/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "labels", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13. Teams",
+      "item": [
+        {
+          "name": "List Teams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/teams",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "teams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Team",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Sales Team\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/teams",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "teams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Team",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/teams/{{team_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "teams", "{{team_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Team",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/teams/{{team_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "teams", "{{team_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "14. Custom Attribute Definitions",
+      "item": [
+        {
+          "name": "List Custom Attributes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_attribute_definitions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "custom_attribute_definitions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Custom Attribute",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"attribute_display_name\": \"Company Size\", \"attribute_key\": \"company_size\", \"attribute_model\": \"contact_attribute\", \"attribute_display_type\": \"list\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_attribute_definitions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "custom_attribute_definitions"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Custom Attribute",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_attribute_definitions/{{custom_attribute_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "custom_attribute_definitions",
+                "{{custom_attribute_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "15. Custom Filters",
+      "item": [
+        {
+          "name": "List Custom Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_filters",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "custom_filters"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Custom Filter",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"Urgent VIP\", \"filter_type\": \"conversation\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_filters",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "custom_filters"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Custom Filter",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_filters/{{custom_filter_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "custom_filters",
+                "{{custom_filter_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "16. Canned Responses",
+      "item": [
+        {
+          "name": "List Canned Responses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/canned_responses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "canned_responses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Canned Response",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"short_code\": \"greeting\", \"content\": \"Hello!\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/canned_responses",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "canned_responses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Canned Response",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/canned_responses/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "canned_responses", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "17. Portals (Help Center)",
+      "item": [
+        {
+          "name": "List Portals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "portals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Portal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Help Center\",\n  \"slug\": \"help\",\n  \"custom_domain\": \"help.mycompany.com\",\n  \"color\": \"#1f93ff\",\n  \"homepage_link\": \"https://mycompany.com\",\n  \"page_title\": \"Help Center\",\n  \"header_text\": \"How can we help you?\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "portals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Portal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "portals", "{{portal_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Portal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Help Center\",\n  \"header_text\": \"Updated header\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "portals", "{{portal_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Portal",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "portals", "{{portal_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Archive Portal",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/archive",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "archive"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Portal Logo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/logo",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "logo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get SSL Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/ssl_status",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "ssl_status"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "18. Portal Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/categories",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Getting Started\",\n  \"slug\": \"getting-started\",\n  \"locale\": \"en\",\n  \"description\": \"Articles to help you get started\",\n  \"position\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/categories",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "categories",
+                "{{category_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Category\",\n  \"position\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "categories",
+                "{{category_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/categories/{{category_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "categories",
+                "{{category_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "19. Portal Articles",
+      "item": [
+        {
+          "name": "List Articles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/articles?page=1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "articles"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Article",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"How to Get Started\",\n  \"content\": \"<p>Welcome! Here is how to get started...</p>\",\n  \"category_id\": 1,\n  \"status\": \"published\",\n  \"slug\": \"how-to-get-started\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/articles",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "articles"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Article",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/articles/{{article_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "articles",
+                "{{article_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Article",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Article Title\",\n  \"content\": \"<p>Updated content...</p>\",\n  \"status\": \"published\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/articles/{{article_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "articles",
+                "{{article_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Article",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/articles/{{article_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "articles",
+                "{{article_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder Articles",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"article_ids\": [3, 1, 2]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/portals/{{portal_id}}/articles/reorder",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "portals",
+                "{{portal_id}}",
+                "articles",
+                "reorder"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "20. Campaigns",
+      "item": [
+        {
+          "name": "List Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/campaigns",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "campaigns"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Welcome Campaign\",\n  \"message\": \"Welcome to our service! How can we help you today?\",\n  \"inbox_id\": 1,\n  \"enabled\": true,\n  \"trigger_only_during_business_hours\": false,\n  \"trigger_rules\": {\n    \"time_on_page\": 10,\n    \"url\": \"https://mywebsite.com/pricing\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/campaigns",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "campaigns"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Campaign",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/campaigns/{{campaign_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "campaigns", "{{campaign_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Campaign",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Campaign\",\n  \"enabled\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/campaigns/{{campaign_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "campaigns", "{{campaign_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/campaigns/{{campaign_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "campaigns", "{{campaign_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "21. Macros",
+      "item": [
+        {
+          "name": "List Macros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/macros",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "macros"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Macro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Close and Tag\",\n  \"visibility\": \"global\",\n  \"actions\": [\n    {\"action_name\": \"add_label\", \"action_params\": [\"resolved\"]},\n    {\"action_name\": \"resolve_conversation\", \"action_params\": []},\n    {\"action_name\": \"send_message\", \"action_params\": [\"Thank you for contacting us!\"]}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/macros",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "macros"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Macro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/macros/{{macro_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "macros", "{{macro_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Macro",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Macro Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/macros/{{macro_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "macros", "{{macro_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Macro",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/macros/{{macro_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "macros", "{{macro_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Execute Macro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_ids\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/macros/{{macro_id}}/execute",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "macros",
+                "{{macro_id}}",
+                "execute"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "22. SLA Policies",
+      "item": [
+        {
+          "name": "List SLA Policies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/sla_policies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "sla_policies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create SLA Policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium Support SLA\",\n  \"description\": \"SLA for premium customers\",\n  \"first_response_time_threshold\": 900,\n  \"next_response_time_threshold\": 1800,\n  \"resolution_time_threshold\": 86400,\n  \"only_during_business_hours\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/sla_policies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "sla_policies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get SLA Policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/sla_policies/{{sla_policy_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "sla_policies",
+                "{{sla_policy_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update SLA Policy",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated SLA\",\n  \"first_response_time_threshold\": 600\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/sla_policies/{{sla_policy_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "sla_policies",
+                "{{sla_policy_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete SLA Policy",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/sla_policies/{{sla_policy_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "sla_policies",
+                "{{sla_policy_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "23. Applied SLAs",
+      "item": [
+        {
+          "name": "List Applied SLAs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/applied_slas?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "applied_slas"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Applied SLAs Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/applied_slas/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "applied_slas", "metrics"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Applied SLAs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/applied_slas/download",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "applied_slas", "download"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "24. Custom Roles",
+      "item": [
+        {
+          "name": "List Custom Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "custom_roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Custom Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Team Lead\",\n  \"description\": \"Team lead with limited admin access\",\n  \"permissions\": [\"conversation_manage\", \"contact_manage\", \"report_view\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_roles",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "custom_roles"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Custom Role",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_roles/{{custom_role_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "custom_roles",
+                "{{custom_role_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Custom Role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Senior Team Lead\",\n  \"permissions\": [\"conversation_manage\", \"contact_manage\", \"report_view\", \"team_manage\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_roles/{{custom_role_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "custom_roles",
+                "{{custom_role_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Custom Role",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/custom_roles/{{custom_role_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "custom_roles",
+                "{{custom_role_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "25. Agent Capacity Policies",
+      "item": [
+        {
+          "name": "List Agent Capacity Policies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_capacity_policies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_capacity_policies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Agent Capacity Policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Standard Capacity\",\n  \"max_conversations\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_capacity_policies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_capacity_policies"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agent Capacity Policy",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_capacity_policies/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_capacity_policies", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Agent Capacity Policy",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"max_conversations\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_capacity_policies/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_capacity_policies", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Agent Capacity Policy",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_capacity_policies/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_capacity_policies", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Policy Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_capacity_policies/1/users",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "agent_capacity_policies",
+                "1",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Users to Policy",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_ids\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_capacity_policies/1/users",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "agent_capacity_policies",
+                "1",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "26. Dashboard Apps",
+      "item": [
+        {
+          "name": "List Dashboard Apps",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/dashboard_apps",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "dashboard_apps"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Dashboard App",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"CRM Integration\",\n  \"content\": [\n    {\n      \"type\": \"frame\",\n      \"url\": \"https://mycrm.com/embed?contact_id={{contact.id}}\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/dashboard_apps",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "dashboard_apps"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Dashboard App",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/dashboard_apps/{{dashboard_app_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "dashboard_apps",
+                "{{dashboard_app_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Dashboard App",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated App Title\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/dashboard_apps/{{dashboard_app_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "dashboard_apps",
+                "{{dashboard_app_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Dashboard App",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/dashboard_apps/{{dashboard_app_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "dashboard_apps",
+                "{{dashboard_app_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "27. Automation Rules",
+      "item": [
+        {
+          "name": "List Automation Rules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/automation_rules",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "automation_rules"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Automation Rule",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Auto-assign Sales\",\n  \"description\": \"Auto assign to sales team\",\n  \"event_name\": \"conversation_created\",\n  \"active\": true,\n  \"conditions\": [\n    {\"attribute_key\": \"inbox_id\", \"filter_operator\": \"equal_to\", \"values\": [1]}\n  ],\n  \"actions\": [\n    {\"action_name\": \"assign_team\", \"action_params\": [1]}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/automation_rules",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "automation_rules"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Automation Rule",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/automation_rules/{{automation_rule_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "automation_rules",
+                "{{automation_rule_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Automation Rule",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Rule\",\n  \"active\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/automation_rules/{{automation_rule_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "automation_rules",
+                "{{automation_rule_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Automation Rule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/automation_rules/{{automation_rule_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "automation_rules",
+                "{{automation_rule_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clone Automation Rule",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/automation_rules/{{automation_rule_id}}/clone",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "automation_rules",
+                "{{automation_rule_id}}",
+                "clone"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "28. Webhooks",
+      "item": [
+        {
+          "name": "List Webhooks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/webhooks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "webhooks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://myapp.com/chatwoot/webhook\",\n  \"subscriptions\": [\n    \"conversation_created\",\n    \"conversation_status_changed\",\n    \"message_created\",\n    \"message_updated\",\n    \"contact_created\",\n    \"contact_updated\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/webhooks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "webhooks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Webhook",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/webhooks/{{webhook_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "webhooks", "{{webhook_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Webhook",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://myapp.com/new-webhook\",\n  \"subscriptions\": [\"message_created\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/webhooks/{{webhook_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "webhooks", "{{webhook_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Webhook",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/webhooks/{{webhook_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "webhooks", "{{webhook_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "29. Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications/unread_count",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications", "unread_count"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications/read_all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications", "read_all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Notification",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"read_at\": \"2024-01-15T10:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Destroy All Notifications",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications/destroy_all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications", "destroy_all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Snooze Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"snoozed_until\": \"2024-01-16T10:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications/1/snooze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications", "1", "snooze"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark as Unread",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notifications/1/unread",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notifications", "1", "unread"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "30. Notification Settings",
+      "item": [
+        {
+          "name": "Get Notification Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notification_settings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notification_settings"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Notification Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"selected_email_flags\": [\"email_conversation_creation\", \"email_conversation_assignment\"],\n  \"selected_push_flags\": [\"push_conversation_creation\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/notification_settings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "notification_settings"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "31. Chat Rooms (Internal)",
+      "item": [
+        {
+          "name": "List Chat Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "chat_rooms"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Chat Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Team Chat\",\n  \"description\": \"Internal chat for sales team\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "chat_rooms"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Chat Room",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "chat_rooms", "{{chat_room_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Chat Room",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Room Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "chat_rooms", "{{chat_room_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Chat Room",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "chat_rooms", "{{chat_room_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}/mark_as_read",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "chat_rooms",
+                "{{chat_room_id}}",
+                "mark_as_read"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Avatar",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}/destroy_avatar",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "chat_rooms",
+                "{{chat_room_id}}",
+                "destroy_avatar"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Chat Room Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}/chat_room_members",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "chat_rooms",
+                "{{chat_room_id}}",
+                "chat_room_members"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Chat Room Members",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_ids\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}/chat_room_members",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "chat_rooms",
+                "{{chat_room_id}}",
+                "chat_room_members"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Chat Room Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "chat_rooms",
+                "{{chat_room_id}}",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Chat Room Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello team!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/chat_rooms/{{chat_room_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "chat_rooms",
+                "{{chat_room_id}}",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "32. Funnels (CRM/Kanban)",
+      "item": [
+        {
+          "name": "List Funnels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "funnels"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Funnel",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Pipeline\",\n  \"description\": \"Main sales funnel\",\n  \"stages\": [\n    {\"name\": \"Lead\", \"position\": 0, \"color\": \"#3498db\"},\n    {\"name\": \"Qualified\", \"position\": 1, \"color\": \"#f39c12\"},\n    {\"name\": \"Proposal\", \"position\": 2, \"color\": \"#9b59b6\"},\n    {\"name\": \"Closed Won\", \"position\": 3, \"color\": \"#27ae60\"}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "funnels"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Funnel Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels/templates",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "funnels", "templates"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create From Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"template_id\": 1,\n  \"name\": \"My Sales Funnel\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels/from_template",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "funnels", "from_template"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Kanban Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels/{{funnel_id}}/kanban/conversations",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "funnels",
+                "{{funnel_id}}",
+                "kanban",
+                "conversations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Stage Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels/{{funnel_id}}/kanban/stage_conversations?stage_id=1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "funnels",
+                "{{funnel_id}}",
+                "kanban",
+                "stage_conversations"
+              ],
+              "query": [
+                {
+                  "key": "stage_id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Move Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": 1,\n  \"stage_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels/{{funnel_id}}/kanban/move_conversation",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "funnels",
+                "{{funnel_id}}",
+                "kanban",
+                "move_conversation"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Load More Stage",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/funnels/{{funnel_id}}/kanban/load_more_stage?stage_id=1&page=2",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "funnels",
+                "{{funnel_id}}",
+                "kanban",
+                "load_more_stage"
+              ],
+              "query": [
+                {
+                  "key": "stage_id",
+                  "value": "1"
+                },
+                {
+                  "key": "page",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "33. Funnel Mappings",
+      "item": [
+        {
+          "name": "List Funnel Mappings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Funnel Mapping",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"funnel_id\": 1,\n  \"stage_id\": 1,\n  \"deal_value\": 5000,\n  \"expected_close_date\": \"2024-03-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Move Stage",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stage_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/move_stage",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "move_stage"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Deal",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deal_value\": 7500,\n  \"expected_close_date\": \"2024-03-15\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/update_deal",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "update_deal"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark as Won",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/mark_won",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "mark_won"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark as Lost",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lost_reason\": \"Price too high\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/mark_lost",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "mark_lost"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reopen Deal",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/reopen_deal",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "reopen_deal"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agent_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/assign_agent",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "assign_agent"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Start Timer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/start_timer",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "start_timer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Pause Timer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/pause_timer",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "pause_timer"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Checklist Item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Send proposal\",\n  \"completed\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/conversations/{{conversation_id}}/funnel_mappings/1/add_checklist_item",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "conversations",
+                "{{conversation_id}}",
+                "funnel_mappings",
+                "1",
+                "add_checklist_item"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "34. AiFocus Agents",
+      "item": [
+        {
+          "name": "List AI Agents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "agents"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create AI Agent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales Assistant\",\n  \"description\": \"AI assistant for sales\",\n  \"system_prompt\": \"You are a helpful sales assistant...\",\n  \"model\": \"gpt-4\",\n  \"provider\": \"openai\",\n  \"enabled\": true,\n  \"tools\": [\"search\", \"calendar\"],\n  \"temperature\": 0.7\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "agents"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get AI Agent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update AI Agent",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Agent\",\n  \"enabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete AI Agent",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Playground (Test Agent)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Hello, can you help me?\",\n  \"conversation_history\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/playground",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "playground"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sync Agent",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/sync",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "sync"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sync All Agents",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/sync_all",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "agents", "sync_all"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Tools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/tools",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "agents", "tools"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Available Models",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/models",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "agents", "models"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get MCP Servers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/mcp_servers",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "mcp_servers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get MCP Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/mcp_templates",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "mcp_templates"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get API Keys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/api_keys",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "agents", "api_keys"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agent Types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/agent_types",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "agent_types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Providers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/providers",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "agents", "providers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Capabilities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/capabilities",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "capabilities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Chatwoot Tools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/chatwoot_tools",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "chatwoot_tools"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "35. AiFocus Agent Inboxes",
+      "item": [
+        {
+          "name": "List Agent Inboxes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/inboxes",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "inboxes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign to Inbox",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inbox_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/inboxes",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "inboxes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove from Inbox",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/inboxes/{{inbox_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "inboxes",
+                "{{inbox_id}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "36. AiFocus Agent Logs",
+      "item": [
+        {
+          "name": "List Agent Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/logs?page=1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Log",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/logs/1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "logs",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Logs Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/logs/stats",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "logs",
+                "stats"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Stream Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/logs/stream",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "logs",
+                "stream"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Clear Logs",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/agents/{{aifocus_agent_id}}/logs/clear",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "aifocus",
+                "agents",
+                "{{aifocus_agent_id}}",
+                "logs",
+                "clear"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "37. AiFocus Custom Tools",
+      "item": [
+        {
+          "name": "List Custom Tools",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/custom_tools",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "custom_tools"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Custom Tool",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"lookup_order\",\n  \"description\": \"Look up order by ID\",\n  \"endpoint_url\": \"https://api.myapp.com/orders\",\n  \"method\": \"GET\",\n  \"parameters\": [\n    {\"name\": \"order_id\", \"type\": \"string\", \"required\": true}\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/custom_tools",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "custom_tools"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Custom Tool",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/custom_tools/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "custom_tools", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Custom Tool",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/custom_tools/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "custom_tools", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Custom Tool",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/aifocus/custom_tools/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "aifocus", "custom_tools", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "38. Reports (v2)",
+      "item": [
+        {
+          "name": "Get Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/reports/summary?type=account&since=1704067200&until=1706745600",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "accounts", "{{account_id}}", "reports", "summary"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "account",
+                  "description": "account, agent, inbox, label, team"
+                },
+                {
+                  "key": "since",
+                  "value": "1704067200"
+                },
+                {
+                  "key": "until",
+                  "value": "1706745600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agents Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/reports/agents?since=1704067200&until=1706745600",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "accounts", "{{account_id}}", "reports", "agents"],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "1704067200"
+                },
+                {
+                  "key": "until",
+                  "value": "1706745600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Inboxes Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/reports/inboxes?since=1704067200&until=1706745600",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "accounts", "{{account_id}}", "reports", "inboxes"],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "1704067200"
+                },
+                {
+                  "key": "until",
+                  "value": "1706745600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Labels Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/reports/labels?since=1704067200&until=1706745600",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "accounts", "{{account_id}}", "reports", "labels"],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "1704067200"
+                },
+                {
+                  "key": "until",
+                  "value": "1706745600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Teams Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/reports/teams?since=1704067200&until=1706745600",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "accounts", "{{account_id}}", "reports", "teams"],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "1704067200"
+                },
+                {
+                  "key": "until",
+                  "value": "1706745600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation Traffic",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/reports/conversation_traffic?since=1704067200&until=1706745600",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v2",
+                "accounts",
+                "{{account_id}}",
+                "reports",
+                "conversation_traffic"
+              ],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "1704067200"
+                },
+                {
+                  "key": "until",
+                  "value": "1706745600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Live Conversation Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/live_reports/conversation_metrics",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v2",
+                "accounts",
+                "{{account_id}}",
+                "live_reports",
+                "conversation_metrics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download Kanban PDF",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v2/accounts/{{account_id}}/kanban_reports/download_pdf?funnel_id={{funnel_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v2", "accounts", "{{account_id}}", "kanban_reports", "download_pdf"],
+              "query": [
+                {
+                  "key": "funnel_id",
+                  "value": "{{funnel_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "39. CSAT Survey Responses",
+      "item": [
+        {
+          "name": "List CSAT Responses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/csat_survey_responses?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "csat_survey_responses"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get CSAT Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/csat_survey_responses/metrics?since=1704067200&until=1706745600",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "csat_survey_responses",
+                "metrics"
+              ],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "1704067200"
+                },
+                {
+                  "key": "until",
+                  "value": "1706745600"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Download CSAT Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/csat_survey_responses/download",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "csat_survey_responses",
+                "download"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "40. Integrations",
+      "item": [
+        {
+          "name": "List Integration Apps",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/apps",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "apps"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Integration App",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/apps/slack",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "apps", "slack"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Integration Hook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"app_id\": \"slack\",\n  \"inbox_id\": 1,\n  \"settings\": {\n    \"channel_id\": \"C123456\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/hooks",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "hooks"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Integration Hook",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/hooks/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "hooks", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Integration Hook",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": {\n    \"channel_id\": \"C789012\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/hooks/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "hooks", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Integration Hook",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/hooks/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "hooks", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "41. Slack Integration",
+      "item": [
+        {
+          "name": "List Slack Channels",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/slack/list_all_channels",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "slack",
+                "list_all_channels"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Slack Integration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"oauth_code_from_slack\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/slack",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "slack"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Slack Integration",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": {}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/slack",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "slack"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Slack Integration",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/slack",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "slack"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "42. Linear Integration",
+      "item": [
+        {
+          "name": "Get Linear Teams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear/teams",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "linear", "teams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Team Entities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear/team_entities?team_id=team_id",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "linear",
+                "team_entities"
+              ],
+              "query": [
+                {
+                  "key": "team_id",
+                  "value": "team_id"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Linear Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": 1,\n  \"team_id\": \"team_id\",\n  \"title\": \"Issue from Chatwoot\",\n  \"description\": \"Description here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear/create_issue",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "linear",
+                "create_issue"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Link Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": 1,\n  \"issue_id\": \"issue_id\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear/link_issue",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "linear",
+                "link_issue"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unlink Issue",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"link_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear/unlink_issue",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "linear",
+                "unlink_issue"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear/search_issue?q=bug",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "linear",
+                "search_issue"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "bug"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Linked Issues",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear/linked_issues?conversation_id=1",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "linear",
+                "linked_issues"
+              ],
+              "query": [
+                {
+                  "key": "conversation_id",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Linear Integration",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/linear",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "linear"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "43. Dyte Integration",
+      "item": [
+        {
+          "name": "Create Meeting",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/dyte/create_a_meeting",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "dyte",
+                "create_a_meeting"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Participant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"meeting_id\": \"meeting_id\",\n  \"participant_name\": \"John Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/dyte/add_participant_to_meeting",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "dyte",
+                "add_participant_to_meeting"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "44. Shopify Integration",
+      "item": [
+        {
+          "name": "Auth Shopify",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"shop\": \"mystore.myshopify.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/shopify/auth",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "shopify", "auth"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Shopify Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/shopify/orders?contact_id={{contact_id}}",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "integrations",
+                "shopify",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "contact_id",
+                  "value": "{{contact_id}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Shopify Integration",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/integrations/shopify",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "integrations", "shopify"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "45. Bulk Actions",
+      "item": [
+        {
+          "name": "Bulk Action",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"Conversation\",\n  \"ids\": [1, 2, 3],\n  \"fields\": {\n    \"status\": \"resolved\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/bulk_actions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "bulk_actions"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "46. Search",
+      "item": [
+        {
+          "name": "Search Conversations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/search/conversations?q=hello",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "search", "conversations"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "hello"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/search/messages?q=order",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "search", "messages"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "order"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/search/contacts?q=john",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "search", "contacts"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "john"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search Articles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/search/articles?q=setup",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "search", "articles"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "setup"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "47. Working Hours",
+      "item": [
+        {
+          "name": "Update Working Hours",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day_of_week\": 1,\n  \"open_hour\": 9,\n  \"open_minutes\": 0,\n  \"close_hour\": 18,\n  \"close_minutes\": 0,\n  \"closed_all_day\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/working_hours/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "working_hours", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "48. Audit Logs",
+      "item": [
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/audit_logs?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "audit_logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "49. Agent Bots",
+      "item": [
+        {
+          "name": "List Agent Bots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_bots",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_bots"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Agent Bot",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Support Bot\",\n  \"description\": \"Automated support bot\",\n  \"outgoing_url\": \"https://mybot.com/webhook\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_bots",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_bots"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Agent Bot",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_bots/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_bots", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Agent Bot",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Bot Name\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_bots/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_bots", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Agent Bot",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/agent_bots/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "accounts", "{{account_id}}", "agent_bots", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "50. Public API",
+      "item": [
+        {
+          "name": "Create Contact (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"unique_id_123\",\n  \"identifier_hash\": \"hmac_hash_if_enabled\",\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone_number\": \"+5511999999999\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/public/api/v1/inboxes/{{inbox_identifier}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["public", "api", "v1", "inboxes", "{{inbox_identifier}}", "contacts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contact (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/public/api/v1/inboxes/{{inbox_identifier}}/contacts/contact_identifier",
+              "host": ["{{base_url}}"],
+              "path": [
+                "public",
+                "api",
+                "v1",
+                "inboxes",
+                "{{inbox_identifier}}",
+                "contacts",
+                "contact_identifier"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Conversation (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"custom_attributes\": {\n    \"source\": \"website\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/public/api/v1/inboxes/{{inbox_identifier}}/contacts/contact_identifier/conversations",
+              "host": ["{{base_url}}"],
+              "path": [
+                "public",
+                "api",
+                "v1",
+                "inboxes",
+                "{{inbox_identifier}}",
+                "contacts",
+                "contact_identifier",
+                "conversations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Conversations (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/public/api/v1/inboxes/{{inbox_identifier}}/contacts/contact_identifier/conversations",
+              "host": ["{{base_url}}"],
+              "path": [
+                "public",
+                "api",
+                "v1",
+                "inboxes",
+                "{{inbox_identifier}}",
+                "contacts",
+                "contact_identifier",
+                "conversations"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Messages (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/public/api/v1/inboxes/{{inbox_identifier}}/contacts/contact_identifier/conversations/1/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "public",
+                "api",
+                "v1",
+                "inboxes",
+                "{{inbox_identifier}}",
+                "contacts",
+                "contact_identifier",
+                "conversations",
+                "1",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Message (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hello from external system\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/public/api/v1/inboxes/{{inbox_identifier}}/contacts/contact_identifier/conversations/1/messages",
+              "host": ["{{base_url}}"],
+              "path": [
+                "public",
+                "api",
+                "v1",
+                "inboxes",
+                "{{inbox_identifier}}",
+                "contacts",
+                "contact_identifier",
+                "conversations",
+                "1",
+                "messages"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "51. WhatsApp Advanced (Evolution/WAHA)",
+      "item": [
+        {
+          "name": "Check Number Exists",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numbers\": [\"5511999999999\", \"5511888888888\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/check_number",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "check_number"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Reaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message_id\": {{message_id}},\n  \"emoji\": \"👍\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/send_reaction",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "send_reaction"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Poll",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": {{conversation_id}},\n  \"question\": \"How was your experience?\",\n  \"options\": [\"Excellent\", \"Good\", \"Average\", \"Poor\"],\n  \"max_answers\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/send_poll",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "send_poll"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": {{conversation_id}},\n  \"latitude\": -23.5505,\n  \"longitude\": -46.6333,\n  \"name\": \"Office\",\n  \"address\": \"São Paulo, Brazil\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/send_location",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "send_location"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Contact (vCard)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": {{conversation_id}},\n  \"contact\": {\n    \"name\": \"John Doe\",\n    \"phone\": \"+5511999999999\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/send_contact",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "send_contact"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Sticker",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": {{conversation_id}},\n  \"sticker_url\": \"https://example.com/sticker.webp\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/send_sticker",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "send_sticker"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Info",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numbers\": [\"5511999999999\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/get_user_info",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "get_user_info"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send Typing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": {{conversation_id}},\n  \"state\": \"typing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/send_typing",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "send_typing"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forward Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message_id\": {{message_id}},\n  \"to_conversation_id\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/forward_message",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "forward_message"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Block Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": {{conversation_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/block_contact",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "block_contact"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Unblock Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": {{conversation_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/accounts/{{account_id}}/inboxes/{{inbox_id}}/whatsapp/unblock_contact",
+              "host": ["{{base_url}}"],
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "{{account_id}}",
+                "inboxes",
+                "{{inbox_id}}",
+                "whatsapp",
+                "unblock_contact"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "key",
+        "value": "api_access_token",
+        "type": "string"
+      },
+      {
+        "key": "value",
+        "value": "{{api_access_token}}",
+        "type": "string"
+      },
+      {
+        "key": "in",
+        "value": "header",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "api_access_token",
+      "value": ""
+    },
+    {
+      "key": "account_id",
+      "value": "1"
+    },
+    {
+      "key": "inbox_id",
+      "value": "1"
+    },
+    {
+      "key": "conversation_id",
+      "value": "1"
+    },
+    {
+      "key": "contact_id",
+      "value": "1"
+    },
+    {
+      "key": "agent_id",
+      "value": "1"
+    },
+    {
+      "key": "team_id",
+      "value": "1"
+    },
+    {
+      "key": "message_id",
+      "value": "1"
+    },
+    {
+      "key": "portal_id",
+      "value": "1"
+    },
+    {
+      "key": "funnel_id",
+      "value": "1"
+    },
+    {
+      "key": "article_id",
+      "value": "1"
+    },
+    {
+      "key": "category_id",
+      "value": "1"
+    },
+    {
+      "key": "campaign_id",
+      "value": "1"
+    },
+    {
+      "key": "macro_id",
+      "value": "1"
+    },
+    {
+      "key": "sla_policy_id",
+      "value": "1"
+    },
+    {
+      "key": "custom_role_id",
+      "value": "1"
+    },
+    {
+      "key": "chat_room_id",
+      "value": "1"
+    },
+    {
+      "key": "aifocus_agent_id",
+      "value": "1"
+    },
+    {
+      "key": "webhook_id",
+      "value": "1"
+    },
+    {
+      "key": "automation_rule_id",
+      "value": "1"
+    },
+    {
+      "key": "custom_filter_id",
+      "value": "1"
+    },
+    {
+      "key": "custom_attribute_id",
+      "value": "1"
+    },
+    {
+      "key": "dashboard_app_id",
+      "value": "1"
+    },
+    {
+      "key": "inbox_identifier",
+      "value": "your_inbox_identifier"
+    }
+  ]
+}
