@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -11,7 +12,7 @@ const uploadMulter = multer({ storage: multer.memoryStorage(), limits: { fileSiz
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const VERSION = 'v8';
+const VERSION = 'v10';
 
 // ========================================
 // SISTEMA DE LOGS
@@ -115,6 +116,66 @@ async function initDatabase() {
                 )
             `);
             log('db', 'Tabela kanban_boards criada/verificada');
+
+            // Tabela de configuração de IA
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS ai_config (
+                    id SERIAL PRIMARY KEY,
+                    client_slug VARCHAR(100) REFERENCES clients(slug) ON DELETE CASCADE UNIQUE,
+                    enabled BOOLEAN DEFAULT FALSE,
+                    provider VARCHAR(50) DEFAULT 'openai',
+                    api_key VARCHAR(500),
+                    model VARCHAR(100) DEFAULT 'gpt-4o-mini',
+                    system_prompt TEXT,
+                    welcome_message TEXT,
+                    transfer_keywords TEXT[] DEFAULT '{"atendente","humano","pessoa","falar com alguém"}',
+                    max_messages_before_transfer INTEGER DEFAULT 10,
+                    only_unassigned BOOLEAN DEFAULT TRUE,
+                    working_hours_start TIME DEFAULT '08:00',
+                    working_hours_end TIME DEFAULT '18:00',
+                    working_days INTEGER[] DEFAULT '{1,2,3,4,5}',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            log('db', 'Tabela ai_config criada/verificada');
+
+            // Adicionar novas colunas se não existirem
+            await pool.query(`ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS split_message_at INTEGER DEFAULT 1000`);
+            await pool.query(`ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS split_by_paragraph BOOLEAN DEFAULT TRUE`);
+            await pool.query(`ALTER TABLE ai_config ADD COLUMN IF NOT EXISTS openai_key_for_whisper VARCHAR(500)`);
+
+            // Tabela de arquivos de conhecimento
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS ai_knowledge_files (
+                    id SERIAL PRIMARY KEY,
+                    client_slug VARCHAR(100) REFERENCES clients(slug) ON DELETE CASCADE,
+                    filename VARCHAR(255) NOT NULL,
+                    original_name VARCHAR(255) NOT NULL,
+                    content TEXT,
+                    file_type VARCHAR(50),
+                    file_size INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            log('db', 'Tabela ai_knowledge_files criada/verificada');
+
+            // Tabela de histórico de conversas com IA
+            await pool.query(`
+                CREATE TABLE IF NOT EXISTS ai_conversations (
+                    id SERIAL PRIMARY KEY,
+                    client_slug VARCHAR(100) REFERENCES clients(slug) ON DELETE CASCADE,
+                    conversation_id INTEGER NOT NULL,
+                    contact_id INTEGER,
+                    messages JSONB DEFAULT '[]',
+                    status VARCHAR(50) DEFAULT 'active',
+                    transferred_to INTEGER,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(client_slug, conversation_id)
+                )
+            `);
+            log('db', 'Tabela ai_conversations criada/verificada');
             return;
         } catch (error) {
             log('warning', `Tentativa ${attempt}/${maxRetries} - PostgreSQL não pronto`, error.message);
@@ -358,6 +419,160 @@ async function deleteBoard(clientSlug, boardId) {
     }
 }
 
+// ========================================
+// FUNÇÕES DE CONFIGURAÇÃO DE IA
+// ========================================
+async function getAIConfig(clientSlug) {
+    if (!usePostgres) return null;
+    try {
+        const result = await pool.query(
+            'SELECT * FROM ai_config WHERE client_slug = $1',
+            [clientSlug]
+        );
+        return result.rows[0] || null;
+    } catch (error) {
+        console.error('Erro ao carregar config IA:', error);
+        return null;
+    }
+}
+
+async function saveAIConfig(clientSlug, config) {
+    if (!usePostgres) return;
+    try {
+        await pool.query(`
+            INSERT INTO ai_config (client_slug, enabled, provider, api_key, model, system_prompt, welcome_message, transfer_keywords, max_messages_before_transfer, only_unassigned, working_hours_start, working_hours_end, working_days, split_message_at, split_by_paragraph, openai_key_for_whisper, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, CURRENT_TIMESTAMP)
+            ON CONFLICT (client_slug) DO UPDATE SET
+                enabled = EXCLUDED.enabled,
+                provider = EXCLUDED.provider,
+                api_key = EXCLUDED.api_key,
+                model = EXCLUDED.model,
+                system_prompt = EXCLUDED.system_prompt,
+                welcome_message = EXCLUDED.welcome_message,
+                transfer_keywords = EXCLUDED.transfer_keywords,
+                max_messages_before_transfer = EXCLUDED.max_messages_before_transfer,
+                only_unassigned = EXCLUDED.only_unassigned,
+                working_hours_start = EXCLUDED.working_hours_start,
+                working_hours_end = EXCLUDED.working_hours_end,
+                working_days = EXCLUDED.working_days,
+                split_message_at = EXCLUDED.split_message_at,
+                split_by_paragraph = EXCLUDED.split_by_paragraph,
+                openai_key_for_whisper = EXCLUDED.openai_key_for_whisper,
+                updated_at = CURRENT_TIMESTAMP
+        `, [
+            clientSlug,
+            config.enabled || false,
+            config.provider || 'openai',
+            config.api_key || '',
+            config.model || 'gpt-4o-mini',
+            config.system_prompt || '',
+            config.welcome_message || '',
+            config.transfer_keywords || ['atendente', 'humano', 'pessoa'],
+            config.max_messages_before_transfer || 10,
+            config.only_unassigned !== false,
+            config.working_hours_start || '08:00',
+            config.working_hours_end || '18:00',
+            config.working_days || [1, 2, 3, 4, 5],
+            config.split_message_at || 1000,
+            config.split_by_paragraph !== false,
+            config.openai_key_for_whisper || null
+        ]);
+    } catch (error) {
+        console.error('Erro ao salvar config IA:', error);
+        throw error;
+    }
+}
+
+// Arquivos de conhecimento
+async function getKnowledgeFiles(clientSlug) {
+    if (!usePostgres) return [];
+    try {
+        const result = await pool.query(
+            'SELECT id, filename, original_name, file_type, file_size, created_at FROM ai_knowledge_files WHERE client_slug = $1 ORDER BY created_at DESC',
+            [clientSlug]
+        );
+        return result.rows;
+    } catch (error) {
+        console.error('Erro ao carregar arquivos:', error);
+        return [];
+    }
+}
+
+async function saveKnowledgeFile(clientSlug, fileData) {
+    if (!usePostgres) return null;
+    try {
+        const result = await pool.query(`
+            INSERT INTO ai_knowledge_files (client_slug, filename, original_name, content, file_type, file_size)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+        `, [clientSlug, fileData.filename, fileData.original_name, fileData.content, fileData.file_type, fileData.file_size]);
+        return result.rows[0].id;
+    } catch (error) {
+        console.error('Erro ao salvar arquivo:', error);
+        throw error;
+    }
+}
+
+async function deleteKnowledgeFile(clientSlug, fileId) {
+    if (!usePostgres) return;
+    try {
+        await pool.query(
+            'DELETE FROM ai_knowledge_files WHERE client_slug = $1 AND id = $2',
+            [clientSlug, fileId]
+        );
+    } catch (error) {
+        console.error('Erro ao deletar arquivo:', error);
+        throw error;
+    }
+}
+
+async function getKnowledgeContent(clientSlug) {
+    if (!usePostgres) return '';
+    try {
+        const result = await pool.query(
+            'SELECT content FROM ai_knowledge_files WHERE client_slug = $1',
+            [clientSlug]
+        );
+        return result.rows.map(r => r.content).join('\n\n---\n\n');
+    } catch (error) {
+        console.error('Erro ao carregar conteúdo:', error);
+        return '';
+    }
+}
+
+// Conversas com IA
+async function getAIConversation(clientSlug, conversationId) {
+    if (!usePostgres) return null;
+    try {
+        const result = await pool.query(
+            'SELECT * FROM ai_conversations WHERE client_slug = $1 AND conversation_id = $2',
+            [clientSlug, conversationId]
+        );
+        return result.rows[0] || null;
+    } catch (error) {
+        console.error('Erro ao carregar conversa IA:', error);
+        return null;
+    }
+}
+
+async function saveAIConversation(clientSlug, conversationId, data) {
+    if (!usePostgres) return;
+    try {
+        await pool.query(`
+            INSERT INTO ai_conversations (client_slug, conversation_id, contact_id, messages, status, transferred_to, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
+            ON CONFLICT (client_slug, conversation_id) DO UPDATE SET
+                messages = EXCLUDED.messages,
+                status = EXCLUDED.status,
+                transferred_to = EXCLUDED.transferred_to,
+                updated_at = CURRENT_TIMESTAMP
+        `, [clientSlug, conversationId, data.contact_id, JSON.stringify(data.messages || []), data.status || 'active', data.transferred_to]);
+    } catch (error) {
+        console.error('Erro ao salvar conversa IA:', error);
+        throw error;
+    }
+}
+
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -526,6 +741,10 @@ app.get('/admin', requireAdmin, async (req, res) => {
                             <a href="/disparador/${slug}" target="_blank" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-gray-600 transition">
                                 <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                 Disparador
+                            </a>
+                            <a href="/ia/${slug}" target="_blank" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-gray-600 transition">
+                                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                Agente IA
                             </a>
                             <div class="border-t border-gray-600"></div>
                             <a href="/admin/${slug}/usuarios" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-200 hover:bg-gray-600 transition">
@@ -1328,6 +1547,584 @@ app.delete('/api/:slug/boards/:boardId', async (req, res) => {
     }
 });
 
+// ========================================
+// API DE CONFIGURAÇÃO DE IA
+// ========================================
+
+// Obter configuração de IA
+app.get('/api/:slug/ai-config', async (req, res) => {
+    try {
+        const config = await getAIConfig(req.params.slug);
+        if (!config) {
+            return res.json({
+                enabled: false,
+                provider: 'openai',
+                model: 'gpt-4o-mini',
+                system_prompt: '',
+                welcome_message: '',
+                transfer_keywords: ['atendente', 'humano', 'pessoa'],
+                max_messages_before_transfer: 10,
+                only_unassigned: true
+            });
+        }
+        // Não retornar a API key completa por segurança
+        res.json({
+            ...config,
+            api_key: config.api_key ? '****' + config.api_key.slice(-4) : ''
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Salvar configuração de IA
+app.post('/api/:slug/ai-config', async (req, res) => {
+    try {
+        const currentConfig = await getAIConfig(req.params.slug);
+        const newConfig = {
+            ...req.body,
+            // Se api_key começa com ****, manter a antiga
+            api_key: req.body.api_key && !req.body.api_key.startsWith('****')
+                ? req.body.api_key
+                : (currentConfig?.api_key || '')
+        };
+        await saveAIConfig(req.params.slug, newConfig);
+        log('success', `Configuração de IA salva`, req.params.slug);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Listar arquivos de conhecimento
+app.get('/api/:slug/ai-knowledge', async (req, res) => {
+    try {
+        const files = await getKnowledgeFiles(req.params.slug);
+        res.json(files);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Upload de arquivo de conhecimento
+app.post('/api/:slug/ai-knowledge', uploadMulter.single('file'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        }
+
+        const file = req.file;
+        let content = '';
+
+        // Extrair texto do arquivo
+        if (file.mimetype === 'text/plain' || file.originalname.endsWith('.txt')) {
+            content = file.buffer.toString('utf8');
+        } else if (file.mimetype === 'application/pdf' || file.originalname.endsWith('.pdf')) {
+            // Para PDF, salvar o texto se possível (simplificado)
+            content = `[Arquivo PDF: ${file.originalname}]\n` + file.buffer.toString('utf8').replace(/[^\x20-\x7E\n]/g, ' ');
+        } else {
+            // Outros formatos, tentar ler como texto
+            content = file.buffer.toString('utf8');
+        }
+
+        const fileId = await saveKnowledgeFile(req.params.slug, {
+            filename: 'knowledge_' + Date.now() + '_' + file.originalname,
+            original_name: file.originalname,
+            content: content,
+            file_type: file.mimetype,
+            file_size: file.size
+        });
+
+        log('success', `Arquivo de conhecimento salvo: ${file.originalname}`, req.params.slug);
+        res.json({ success: true, id: fileId });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Deletar arquivo de conhecimento
+app.delete('/api/:slug/ai-knowledge/:fileId', async (req, res) => {
+    try {
+        await deleteKnowledgeFile(req.params.slug, parseInt(req.params.fileId));
+        log('success', `Arquivo de conhecimento deletado: ${req.params.fileId}`, req.params.slug);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Testar IA localmente (sem Chatwoot)
+app.post('/api/:slug/ai-test', async (req, res) => {
+    try {
+        const { message } = req.body;
+        if (!message) {
+            return res.status(400).json({ error: 'Mensagem é obrigatória' });
+        }
+
+        const aiConfig = await getAIConfig(req.params.slug);
+        if (!aiConfig || !aiConfig.api_key) {
+            return res.status(400).json({ error: 'Configure a API Key primeiro' });
+        }
+
+        // Buscar base de conhecimento
+        const knowledge = await getKnowledgeContent(req.params.slug);
+
+        // Construir prompt do sistema
+        let systemPrompt = aiConfig.system_prompt || 'Você é um assistente virtual prestativo.';
+        if (knowledge) {
+            systemPrompt += '\n\n=== BASE DE CONHECIMENTO ===\n' + knowledge;
+        }
+
+        const messages = [{ role: 'user', content: message }];
+
+        let aiResponse = '';
+        if (aiConfig.provider === 'openai') {
+            aiResponse = await callOpenAI(aiConfig.api_key, aiConfig.model, systemPrompt, messages);
+        } else if (aiConfig.provider === 'gemini') {
+            aiResponse = await callGemini(aiConfig.api_key, aiConfig.model, systemPrompt, messages);
+        }
+
+        log('success', `Teste de IA realizado`, req.params.slug);
+        res.json({ response: aiResponse });
+
+    } catch (error) {
+        log('error', `Erro no teste de IA: ${error.message}`, req.params.slug);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Configurar webhook automaticamente no Chatwoot
+app.post('/api/:slug/ai-setup-webhook', async (req, res) => {
+    try {
+        const clients = await loadClients();
+        const client = clients[req.params.slug];
+
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente não encontrado' });
+        }
+
+        const { webhookUrl } = req.body;
+        if (!webhookUrl) {
+            return res.status(400).json({ error: 'URL do webhook é obrigatória' });
+        }
+
+        const fetch = (await import('node-fetch')).default;
+
+        // Primeiro, listar webhooks existentes para ver se já existe
+        const listResponse = await fetch(`${client.apiUrl}/api/v1/accounts/${client.accountId}/webhooks`, {
+            headers: { 'api_access_token': client.apiToken }
+        });
+
+        let existingWebhook = null;
+        if (listResponse.ok) {
+            const webhooksData = await listResponse.json();
+            // A API pode retornar { payload: [...] } ou [...] diretamente
+            let webhooksList = [];
+            if (Array.isArray(webhooksData)) {
+                webhooksList = webhooksData;
+            } else if (webhooksData.payload && Array.isArray(webhooksData.payload)) {
+                webhooksList = webhooksData.payload;
+            } else if (typeof webhooksData === 'object') {
+                // Pode ser um objeto com webhooks como propriedades
+                webhooksList = Object.values(webhooksData).filter(v => v && typeof v === 'object' && v.url);
+            }
+            existingWebhook = webhooksList.find(w => w && w.url && w.url.includes('/webhook/'));
+        }
+
+        if (existingWebhook) {
+            // Atualizar webhook existente
+            const updateResponse = await fetch(`${client.apiUrl}/api/v1/accounts/${client.accountId}/webhooks/${existingWebhook.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'api_access_token': client.apiToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    url: webhookUrl,
+                    subscriptions: ['message_created']
+                })
+            });
+
+            if (updateResponse.ok) {
+                log('success', `Webhook atualizado no Chatwoot`, req.params.slug);
+                return res.json({ success: true, action: 'updated', id: existingWebhook.id });
+            }
+        }
+
+        // Criar novo webhook
+        const createResponse = await fetch(`${client.apiUrl}/api/v1/accounts/${client.accountId}/webhooks`, {
+            method: 'POST',
+            headers: {
+                'api_access_token': client.apiToken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                url: webhookUrl,
+                subscriptions: ['message_created']
+            })
+        });
+
+        if (!createResponse.ok) {
+            const errorText = await createResponse.text();
+            throw new Error(`Chatwoot API error: ${errorText}`);
+        }
+
+        const newWebhook = await createResponse.json();
+        log('success', `Webhook criado no Chatwoot`, req.params.slug);
+        res.json({ success: true, action: 'created', id: newWebhook.id });
+
+    } catch (error) {
+        log('error', `Erro ao configurar webhook: ${error.message}`, req.params.slug);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========================================
+// WEBHOOK DO CHATWOOT - RECEBER MENSAGENS
+// ========================================
+app.post('/webhook/:slug', async (req, res) => {
+    try {
+        const slug = req.params.slug;
+        const payload = req.body;
+
+        log('api', `Webhook recebido: ${payload.event}`, slug);
+        log('info', `Payload: event=${payload.event}, message_type=${payload.message_type}, content="${(payload.content || '').substring(0, 50)}"`, slug);
+
+        // Verificar se é uma mensagem de entrada
+        if (payload.event !== 'message_created') {
+            log('info', `Ignorado: evento não é message_created (é ${payload.event})`, slug);
+            return res.json({ status: 'ignored', reason: 'not_message_created' });
+        }
+
+        if (payload.message_type !== 'incoming') {
+            log('info', `Ignorado: message_type não é incoming (é ${payload.message_type})`, slug);
+            return res.json({ status: 'ignored', reason: 'not_incoming_message' });
+        }
+
+        // Buscar configuração de IA
+        const aiConfig = await getAIConfig(slug);
+        log('info', `AI Config: enabled=${aiConfig?.enabled}, provider=${aiConfig?.provider}, has_key=${!!aiConfig?.api_key}`, slug);
+
+        if (!aiConfig || !aiConfig.enabled) {
+            log('info', `Ignorado: IA desabilitada ou não configurada`, slug);
+            return res.json({ status: 'ignored', reason: 'ai_disabled' });
+        }
+
+        const conversation = payload.conversation;
+        let message = payload.content || '';
+        const contactId = payload.sender?.id;
+        const attachments = payload.attachments || [];
+
+        log('info', `Conversa: id=${conversation?.id}, assignee_id=${conversation?.assignee_id}, mensagem="${message.substring(0, 50)}"`, slug);
+
+        // Processar áudio se houver
+        if (attachments.length > 0) {
+            log('info', `Attachments recebidos: ${JSON.stringify(attachments.map(a => ({file_type: a.file_type, content_type: a.content_type, data_url: a.data_url?.substring(0, 50)})))}`, slug);
+            for (const att of attachments) {
+                if (att.file_type === 'audio' && att.data_url) {
+                    try {
+                        log('info', `Processando áudio na conversa ${conversation.id}, content_type=${att.content_type}`, slug);
+                        // Baixar o áudio
+                        const fetch = (await import('node-fetch')).default;
+                        const audioResponse = await fetch(att.data_url);
+                        if (!audioResponse.ok) {
+                            log('error', `Erro ao baixar áudio: ${audioResponse.status} ${audioResponse.statusText}`, slug);
+                            continue;
+                        }
+                        const audioBuffer = await audioResponse.buffer();
+                        log('info', `Áudio baixado: ${audioBuffer.length} bytes`, slug);
+
+                        // Transcrever usando Whisper (precisa de API key OpenAI)
+                        // Funciona tanto com OpenAI quanto com Gemini (usa API OpenAI para Whisper)
+                        if (aiConfig.api_key) {
+                            // Se estiver usando Gemini, precisamos de uma chave OpenAI separada para Whisper
+                            // Por agora, só transcrevemos se for OpenAI ou se tiver openai_key_for_whisper
+                            let whisperKey = aiConfig.provider === 'openai' ? aiConfig.api_key : aiConfig.openai_key_for_whisper;
+
+                            if (whisperKey) {
+                                const mimeType = att.content_type || 'audio/ogg';
+                                log('info', `Enviando para Whisper com MIME type: ${mimeType}`, slug);
+                                const transcription = await transcribeAudio(whisperKey, audioBuffer, mimeType);
+                                if (transcription) {
+                                    message = (message ? message + '\n' : '') + '[Áudio transcrito]: ' + transcription;
+                                    log('success', `Áudio transcrito: ${transcription.substring(0, 100)}...`, slug);
+                                }
+                            } else {
+                                log('info', `Whisper não disponível (provider=${aiConfig.provider}, sem chave OpenAI para Whisper)`, slug);
+                                message = (message ? message + '\n' : '') + '[Áudio recebido - transcrição não disponível sem chave OpenAI]';
+                            }
+                        } else {
+                            message = (message ? message + '\n' : '') + '[Áudio recebido - transcrição não disponível]';
+                        }
+                    } catch (audioError) {
+                        log('error', `Erro ao processar áudio: ${audioError.message}`, slug);
+                        log('error', `Stack: ${audioError.stack}`, slug);
+                    }
+                }
+            }
+        }
+
+        // Se não tem mensagem após processar, ignorar
+        if (!message.trim()) {
+            log('info', `Ignorado: mensagem vazia`, slug);
+            return res.json({ status: 'ignored', reason: 'empty_message' });
+        }
+
+        // Verificar se só deve responder conversas não atribuídas
+        if (aiConfig.only_unassigned && conversation.assignee_id) {
+            log('info', `Ignorado: conversa já atribuída a ${conversation.assignee_id}`, slug);
+            return res.json({ status: 'ignored', reason: 'already_assigned' });
+        }
+
+        log('info', `Processando mensagem: "${message.substring(0, 100)}"`, slug);
+
+        // Verificar palavras de transferência
+        const lowerMessage = (message || '').toLowerCase();
+        const shouldTransfer = (aiConfig.transfer_keywords || []).some(keyword =>
+            lowerMessage.includes(keyword.toLowerCase())
+        );
+
+        if (shouldTransfer) {
+            log('info', `Transferência solicitada na conversa ${conversation.id}`, slug);
+            // Aqui poderia atribuir a um agente automaticamente
+            return res.json({ status: 'transfer_requested' });
+        }
+
+        // Buscar ou criar histórico da conversa
+        let aiConv = await getAIConversation(slug, conversation.id);
+        let messages = aiConv?.messages || [];
+
+        // Adicionar mensagem do usuário
+        messages.push({ role: 'user', content: message });
+
+        // Verificar limite de mensagens
+        if (messages.length > (aiConfig.max_messages_before_transfer || 10) * 2) {
+            log('info', `Limite de mensagens atingido na conversa ${conversation.id}`, slug);
+            return res.json({ status: 'limit_reached' });
+        }
+
+        // Chamar IA
+        const clients = await loadClients();
+        const client = clients[slug];
+        if (!client) {
+            return res.status(404).json({ error: 'Cliente não encontrado' });
+        }
+
+        // Buscar base de conhecimento
+        const knowledge = await getKnowledgeContent(slug);
+
+        // Construir prompt do sistema
+        let systemPrompt = aiConfig.system_prompt || 'Você é um assistente virtual prestativo.';
+        if (knowledge) {
+            systemPrompt += '\n\n=== BASE DE CONHECIMENTO ===\n' + knowledge;
+        }
+
+        // Gerar resposta
+        log('info', `Chamando IA: provider=${aiConfig.provider}, model=${aiConfig.model}`, slug);
+        let aiResponse = '';
+        try {
+            if (aiConfig.provider === 'openai') {
+                aiResponse = await callOpenAI(aiConfig.api_key, aiConfig.model, systemPrompt, messages);
+            } else if (aiConfig.provider === 'gemini') {
+                aiResponse = await callGemini(aiConfig.api_key, aiConfig.model, systemPrompt, messages);
+            }
+            log('info', `Resposta da IA recebida: ${aiResponse ? aiResponse.substring(0, 100) + '...' : 'VAZIA'}`, slug);
+        } catch (aiError) {
+            log('error', `Erro ao chamar IA: ${aiError.message}`, slug);
+            return res.status(500).json({ error: 'Erro ao processar IA' });
+        }
+
+        if (!aiResponse) {
+            log('warning', `IA não retornou resposta`, slug);
+            return res.json({ status: 'no_response' });
+        }
+
+        // Dividir mensagem baseado nas configurações
+        const maxLength = Math.min(aiConfig.split_message_at || 1000, 4000); // Máximo 4000 do Chatwoot
+        const splitByParagraph = aiConfig.split_by_paragraph !== false;
+
+        let responseParts = [];
+        if (aiResponse.length <= maxLength) {
+            responseParts = [aiResponse];
+        } else if (splitByParagraph) {
+            // Dividir por parágrafos/quebras de linha
+            const paragraphs = aiResponse.split(/\n\n+/);
+            let currentPart = '';
+
+            for (const paragraph of paragraphs) {
+                if ((currentPart + '\n\n' + paragraph).length > maxLength && currentPart) {
+                    responseParts.push(currentPart.trim());
+                    currentPart = paragraph;
+                } else {
+                    currentPart = currentPart ? currentPart + '\n\n' + paragraph : paragraph;
+                }
+            }
+            if (currentPart.trim()) {
+                responseParts.push(currentPart.trim());
+            }
+
+            // Se ainda tem partes muito grandes, dividir por caracteres
+            responseParts = responseParts.flatMap(part => {
+                if (part.length <= maxLength) return [part];
+                const subParts = [];
+                for (let i = 0; i < part.length; i += maxLength) {
+                    subParts.push(part.substring(i, i + maxLength));
+                }
+                return subParts;
+            });
+        } else {
+            // Dividir simplesmente por caracteres
+            for (let i = 0; i < aiResponse.length; i += maxLength) {
+                responseParts.push(aiResponse.substring(i, i + maxLength));
+            }
+        }
+
+        log('info', `Mensagem dividida em ${responseParts.length} parte(s) (max: ${maxLength} chars, byParagraph: ${splitByParagraph})`, slug);
+
+        // Enviar resposta(s) para o Chatwoot
+        log('info', `Enviando ${responseParts.length} parte(s) para Chatwoot`, slug);
+        const fetch = (await import('node-fetch')).default;
+        for (let i = 0; i < responseParts.length; i++) {
+            const part = responseParts[i];
+            log('info', `Enviando parte ${i + 1}/${responseParts.length} para conversa ${conversation.id}`, slug);
+            const sendResponse = await fetch(`${client.apiUrl}/api/v1/accounts/${client.accountId}/conversations/${conversation.id}/messages`, {
+                method: 'POST',
+                headers: {
+                    'api_access_token': client.apiToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: part,
+                    message_type: 'outgoing',
+                    private: false
+                })
+            });
+            const sendResult = await sendResponse.text();
+            log('info', `Resposta do Chatwoot: status=${sendResponse.status}, body=${sendResult.substring(0, 200)}`, slug);
+        }
+
+        // Salvar histórico
+        messages.push({ role: 'assistant', content: aiResponse });
+        await saveAIConversation(slug, conversation.id, {
+            contact_id: contactId,
+            messages: messages,
+            status: 'active'
+        });
+
+        log('success', `IA respondeu conversa ${conversation.id}`, slug);
+        res.json({ status: 'responded', parts: responseParts.length });
+
+    } catch (error) {
+        log('error', `Erro no webhook: ${error.message}`, req.params.slug);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ========================================
+// FUNÇÕES DE INTEGRAÇÃO COM IAs
+// ========================================
+async function callOpenAI(apiKey, model, systemPrompt, messages) {
+    const fetch = (await import('node-fetch')).default;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            model: model || 'gpt-4o-mini',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                ...messages
+            ],
+            max_tokens: 1000,
+            temperature: 0.7
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`OpenAI API error: ${error}`);
+    }
+
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || '';
+}
+
+async function callGemini(apiKey, model, systemPrompt, messages) {
+    const fetch = (await import('node-fetch')).default;
+
+    // Converter formato de mensagens para Gemini
+    const geminiMessages = messages.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+    }));
+
+    // Adicionar system prompt como primeira mensagem
+    geminiMessages.unshift({
+        role: 'user',
+        parts: [{ text: `Instruções do sistema: ${systemPrompt}` }]
+    });
+    geminiMessages.splice(1, 0, {
+        role: 'model',
+        parts: [{ text: 'Entendido, seguirei essas instruções.' }]
+    });
+
+    const geminiModel = model || 'gemini-1.5-flash';
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            contents: geminiMessages,
+            generationConfig: {
+                maxOutputTokens: 1000,
+                temperature: 0.7
+            }
+        })
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Gemini API error: ${error}`);
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+// Transcrever áudio usando Whisper (OpenAI)
+async function transcribeAudio(apiKey, audioBuffer, mimeType) {
+    const fetch = (await import('node-fetch')).default;
+    const FormData = (await import('form-data')).default;
+
+    const form = new FormData();
+    form.append('file', audioBuffer, {
+        filename: 'audio.ogg',
+        contentType: mimeType || 'audio/ogg'
+    });
+    form.append('model', 'whisper-1');
+
+    const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            ...form.getHeaders()
+        },
+        body: form
+    });
+
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Whisper API error: ${error}`);
+    }
+
+    const data = await response.json();
+    return data.text || '';
+}
+
 // API para salvar permissões de usuário (chamado pelo kanban)
 app.post('/api/:slug/user-permissions/:userId', async (req, res) => {
     try {
@@ -1360,6 +2157,34 @@ app.post('/api/:slug/user-permissions/:userId', async (req, res) => {
         log('error', 'Erro ao salvar permissões via API', error.message);
         res.status(500).json({ error: error.message });
     }
+});
+
+// ========================================
+// ROTA DA IA (Configuração do Agente)
+// ========================================
+app.get('/ia/:slug', async (req, res) => {
+    const clients = await loadClients();
+    const client = clients[req.params.slug];
+
+    if (!client) {
+        return res.status(404).json({ error: 'Cliente não encontrado' });
+    }
+
+    let html = fs.readFileSync(path.join(__dirname, 'ia.html'), 'utf8');
+
+    const configScript = `
+    <script>
+        window.CLIENT_CONFIG = {
+            slug: "${req.params.slug}",
+            name: "${client.name}",
+            apiUrl: "${client.apiUrl}",
+            accountId: "${client.accountId}"
+        };
+    </script>
+    `;
+
+    html = html.replace('</head>', configScript + '</head>');
+    res.send(html);
 });
 
 // ========================================
