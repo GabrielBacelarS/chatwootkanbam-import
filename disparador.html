@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disparador - Closefy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #f0f2f5; --bg-secondary: #ffffff; --bg-card: #ffffff;
+            --bg-header: #ffffff; --bg-input: #ffffff; --bg-badge: #eef1f6;
+            --bg-info: #f0f4ff; --border-primary: #e2e8f0; --border-card: #e8ecf1;
+            --border-input: #d1d9e6; --text-primary: #1a202c; --text-secondary: #4a5568;
+            --text-muted: #8896ab; --text-dim: #a0aec0;
+            --accent: #4f6ef7; --accent-hover: #3b5de7; --accent-light: #eef1ff; --accent-text: #4f6ef7;
+            --green: #10b981; --green-light: #ecfdf5; --green-text: #059669;
+            --red: #ef4444; --red-light: #fef2f2; --red-text: #dc2626;
+            --purple: #8b5cf6; --purple-light: #f5f3ff;
+            --orange: #f59e0b; --orange-light: #fffbeb; --orange-text: #d97706;
+            --shadow-card: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
+            --radius: 10px; --radius-lg: 14px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #0f1117; --bg-secondary: #1a1d27; --bg-card: #222639;
+            --bg-header: #161820; --bg-input: #222639; --bg-badge: #2a2e42;
+            --bg-info: #1e2235; --border-primary: #2d3148; --border-card: #2d3148;
+            --border-input: #3d4260; --text-primary: #e8ecf4; --text-secondary: #a0aec0;
+            --text-muted: #6b7a90; --text-dim: #4a5568;
+            --accent: #6479f8; --accent-hover: #7b8ef9; --accent-light: #1e2245; --accent-text: #8b9cfa;
+            --green-light: #0d2818; --green-text: #34d399;
+            --red-light: #2d1215; --red-text: #f87171;
+            --purple-light: #1e1535; --orange-light: #2d2210; --orange-text: #fbbf24;
+            --shadow-card: 0 1px 4px rgba(0,0,0,0.2); --shadow-lg: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+
+        .header { background: var(--bg-header); border-bottom: 1px solid var(--border-primary); padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-logo { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; color: var(--accent); }
+        .header-logo svg { width: 28px; height: 28px; }
+        .header-btn { width: 36px; height: 36px; border-radius: 8px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+        .header-btn:hover { background: var(--bg-badge); color: var(--accent); }
+        .header-btn svg { width: 18px; height: 18px; }
+
+        .container { max-width: 860px; margin: 0 auto; padding: 24px 20px; }
+
+        /* Step Bar */
+        .step-bar { display: flex; align-items: center; justify-content: center; gap: 0; margin-bottom: 28px; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-lg); border: 1px solid var(--border-primary); }
+        .step-num { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 2px solid var(--border-input); color: var(--text-muted); background: var(--bg-secondary); transition: var(--transition); flex-shrink: 0; }
+        .step-num.active { background: var(--accent); border-color: var(--accent); color: white; }
+        .step-num.done { background: var(--green); border-color: var(--green); color: white; }
+        .step-line { width: 50px; height: 2px; background: var(--border-input); transition: var(--transition); }
+        .step-line.done { background: var(--green); }
+        .step-label { font-size: 10px; font-weight: 600; color: var(--text-muted); text-align: center; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .step-item { display: flex; flex-direction: column; align-items: center; gap: 0; }
+
+        /* Panel */
+        .panel { background: var(--bg-secondary); border: 1px solid var(--border-primary); border-radius: var(--radius-lg); padding: 28px; margin-bottom: 16px; }
+        .panel-title { font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .panel-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+
+        /* Form */
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border-input); border-radius: var(--radius); background: var(--bg-input); color: var(--text-primary); font-size: 14px; font-family: inherit; transition: var(--transition); outline: none; }
+        .form-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+        .form-input::placeholder { color: var(--text-dim); }
+        textarea.form-input { resize: vertical; min-height: 80px; }
+        .form-hint { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-secondary { background: var(--bg-badge); color: var(--text-secondary); }
+        .btn-secondary:hover { background: var(--border-primary); }
+        .btn-danger { background: var(--red-light); color: var(--red-text); }
+        .btn-danger:hover { background: var(--red); color: white; }
+        .btn-success { background: var(--green); color: white; }
+        .btn-success:hover { opacity: 0.9; }
+        .btn-sm { padding: 7px 14px; font-size: 12px; }
+        .step-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+
+        /* Inbox Grid */
+        .inbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+        .inbox-card { padding: 14px; border: 2px solid var(--border-card); border-radius: var(--radius); cursor: pointer; transition: var(--transition); background: var(--bg-card); }
+        .inbox-card:hover { border-color: var(--accent); }
+        .inbox-card.selected { border-color: var(--accent); background: var(--accent-light); }
+        .inbox-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .inbox-type { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+        /* Template Card */
+        .tpl-card { background: var(--bg-card); border: 1px solid var(--border-card); border-radius: var(--radius); padding: 18px; margin-bottom: 12px; position: relative; }
+        .tpl-badge { position: absolute; top: -10px; left: 14px; background: var(--accent); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+        .tpl-remove { position: absolute; top: 8px; right: 8px; }
+        .media-zone { border: 2px dashed var(--border-input); border-radius: var(--radius); padding: 16px; text-align: center; cursor: pointer; transition: var(--transition); color: var(--text-muted); font-size: 13px; }
+        .media-zone:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .media-zone.has-file { border-style: solid; border-color: var(--green); background: var(--green-light); }
+        .media-preview { display: flex; align-items: center; gap: 10px; }
+        .media-preview img { max-width: 80px; max-height: 60px; border-radius: 6px; object-fit: cover; }
+        .media-preview .media-info { font-size: 12px; color: var(--text-secondary); }
+        .media-preview .media-name { font-weight: 600; }
+
+        /* Variables Info */
+        .vars-box { background: var(--bg-info); border-radius: var(--radius); padding: 14px; margin-top: 16px; }
+        .vars-box h4 { font-size: 12px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .vars-box code { background: var(--bg-badge); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-weight: 600; color: var(--accent-text); }
+
+        /* Contact Source Tabs */
+        .source-tabs { display: flex; gap: 0; margin-bottom: 20px; background: var(--bg-badge); border-radius: var(--radius); padding: 4px; }
+        .source-tab { flex: 1; padding: 9px; border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 7px; transition: var(--transition); font-family: inherit; }
+        .source-tab.active { background: var(--bg-secondary); color: var(--text-primary); box-shadow: var(--shadow-card); }
+
+        /* Drop Zone */
+        .drop-zone { border: 2px dashed var(--border-input); border-radius: var(--radius); padding: 40px 20px; text-align: center; cursor: pointer; transition: var(--transition); color: var(--text-muted); }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+        .drop-zone svg { width: 40px; height: 40px; margin: 0 auto 10px; opacity: 0.5; }
+        .drop-zone p { font-size: 14px; font-weight: 500; }
+        .drop-zone small { font-size: 12px; color: var(--text-dim); }
+
+        /* Mapping Table */
+        .map-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        .map-table th { text-align: left; padding: 8px 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-primary); }
+        .map-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-primary); font-size: 13px; }
+        .map-table select { padding: 6px 10px; border: 1px solid var(--border-input); border-radius: 6px; background: var(--bg-input); color: var(--text-primary); font-size: 13px; font-family: inherit; }
+
+        /* Contact Summary */
+        .contacts-badge { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--accent-light); border-radius: var(--radius); font-size: 14px; font-weight: 600; color: var(--accent-text); margin-top: 16px; }
+        .contacts-badge strong { font-size: 20px; }
+
+        /* Summary Cards */
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+        .summary-card { padding: 16px; border-radius: var(--radius); text-align: center; }
+        .summary-card .val { font-size: 28px; font-weight: 800; }
+        .summary-card .lbl { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+
+        /* Progress */
+        .progress-track { width: 100%; height: 10px; background: var(--bg-badge); border-radius: 5px; overflow: hidden; margin: 16px 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 5px; transition: width 0.4s ease; }
+        .progress-info { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+        .stat-card { padding: 14px; border-radius: var(--radius); text-align: center; }
+        .stat-val { font-size: 24px; font-weight: 800; }
+        .stat-lbl { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+        .dispatch-controls { display: flex; gap: 8px; margin-bottom: 16px; }
+
+        /* Log */
+        .dispatch-log { background: #0d1117; border-radius: var(--radius); padding: 14px; max-height: 280px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.7; margin-top: 16px; }
+        .dispatch-log::-webkit-scrollbar { width: 4px; }
+        .dispatch-log::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+        .log-line { color: #8b949e; }
+        .log-line.success { color: #3fb950; }
+        .log-line.error { color: #f85149; }
+        .log-line.warning { color: #d29922; }
+        .log-line.info { color: #58a6ff; }
+        .log-line.dim { color: #484f58; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 100; display: flex; align-items: center; justify-content: center; }
+        .modal { background: var(--bg-secondary); border-radius: 16px; max-width: 480px; width: 95%; box-shadow: var(--shadow-lg); border: 1px solid var(--border-primary); }
+        .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-primary); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-size: 18px; font-weight: 700; }
+        .modal-body { padding: 24px; }
+        .modal-footer { padding: 16px 24px; border-top: 1px solid var(--border-primary); display: flex; justify-content: flex-end; gap: 10px; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <div class="header-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Disparador
+            </div>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+            <button class="header-btn" onclick="toggleTheme()" title="Tema">
+                <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            </button>
+            <button id="userBadge" onclick="changeUser()" class="header-btn" style="display:none;gap:6px;padding:6px 12px;font-size:12px;width:auto" title="Trocar usuário">
+                <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span id="userBadgeName"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- User Selection State (only shown in standalone/dev mode) -->
+    <div id="userSelectState" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 56px);gap:16px;padding:20px">
+        <div style="background:var(--orange);color:white;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600">
+            ⚠️ Modo Desenvolvimento - Acesso via Chatwoot detecta o usuário automaticamente
+        </div>
+        <svg style="width:80px;height:80px;color:var(--text-dim);opacity:0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        <h2 style="font-size:20px;font-weight:700;color:var(--text-secondary)">Selecione seu usuário</h2>
+        <p style="font-size:14px;color:var(--text-muted)">Escolha seu perfil para acessar o disparador (modo teste)</p>
+        <div id="userList" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;justify-content:center;max-width:600px"></div>
+    </div>
+
+    <div class="container" id="mainContent">
+        <!-- Step Bar -->
+        <div class="step-bar" id="stepBar"></div>
+
+        <!-- Step 1: Inbox -->
+        <div id="step1">
+            <div class="panel">
+                <div class="panel-title">Selecione a Caixa de Entrada</div>
+                <div class="panel-desc">Escolha o canal por onde as mensagens serao enviadas</div>
+                <div class="inbox-grid" id="inboxGrid">
+                    <div style="text-align:center;padding:20px;color:var(--text-muted)">Carregando...</div>
+                </div>
+            </div>
+            <div class="step-actions">
+                <div></div>
+                <button class="btn btn-primary" id="btnNext1" disabled onclick="goToStep(2)">Proximo</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Templates -->
+        <div id="step2" class="hidden">
+            <div class="panel">
+                <div class="panel-title">Modelos de Mensagem</div>
+                <div class="panel-desc">Crie modelos que serao enviados em rotacao para cada contato</div>
+                <div id="templatesContainer"></div>
+                <button class="btn btn-secondary btn-sm" onclick="addTemplate()" style="margin-top:8px">+ Adicionar Modelo</button>
+                <div class="vars-box">
+                    <h4>Variaveis disponiveis</h4>
+                    <p style="font-size:12px;color:var(--text-muted);line-height:1.8">
+                        <code>{nome}</code> Nome do contato &nbsp;
+                        <code>{telefone}</code> Telefone &nbsp;
+                        <code>{email}</code> Email &nbsp;
+                        <code>{data}</code> Data atual
+                    </p>
+                </div>
+            </div>
+            <div class="step-actions">
+                <button class="btn btn-secondary" onclick="goToStep(1)">Voltar</button>
+                <button class="btn btn-primary" id="btnNext2" disabled onclick="goToStep(3)">Proximo</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Contacts -->
+        <div id="step3" class="hidden">
+            <div class="panel">
+                <div class="panel-title">Selecione os Contatos</div>
+                <div class="panel-desc">Faca upload de uma planilha ou busque contatos no Chatwoot</div>
+                <div class="source-tabs">
+                    <button class="source-tab active" onclick="setContactSource('upload')">Upload Planilha</button>
+                    <button class="source-tab" onclick="setContactSource('chatwoot')">Buscar no Chatwoot</button>
+                </div>
+                <div id="contactUploadArea">
+                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
+                        ondragover="event.preventDefault();this.classList.add('drag-over')"
+                        ondragleave="this.classList.remove('drag-over')"
+                        ondrop="event.preventDefault();this.classList.remove('drag-over');handleContactFile(event.dataTransfer.files[0])">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+                        <p>Arraste sua planilha aqui ou clique para selecionar</p>
+                        <small>.xlsx, .xls, .csv</small>
+                    </div>
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleContactFile(this.files[0])">
+                    <div id="mappingArea" class="hidden"></div>
+                </div>
+                <div id="contactSearchArea" class="hidden">
+                    <div style="display:flex;gap:8px">
+                        <input type="text" class="form-input" placeholder="Buscar por nome ou telefone..." id="searchInput" oninput="debounceSearch(this.value)">
+                    </div>
+                    <div id="searchResults" style="margin-top:12px;max-height:300px;overflow-y:auto"></div>
+                </div>
+                <div id="contactsSummary" class="hidden">
+                    <div class="contacts-badge"><strong id="contactCount">0</strong> contatos selecionados</div>
+                </div>
+            </div>
+            <div class="step-actions">
+                <button class="btn btn-secondary" onclick="goToStep(2)">Voltar</button>
+                <button class="btn btn-primary" id="btnNext3" disabled onclick="goToStep(4)">Proximo</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Config -->
+        <div id="step4" class="hidden">
+            <div class="panel">
+                <div class="panel-title">Configuracao do Disparo</div>
+                <div class="panel-desc">Revise e configure antes de iniciar</div>
+                <div class="form-group">
+                    <label class="form-label">Intervalo entre envios (segundos)</label>
+                    <input type="number" class="form-input" id="intervalInput" min="15" value="15" step="1" style="max-width:200px" oninput="updateSummary()">
+                    <div class="form-hint">Minimo 15 segundos. Recomendado para evitar bloqueios.</div>
+                </div>
+                <div class="summary-grid" id="summaryGrid"></div>
+            </div>
+            <div class="step-actions">
+                <button class="btn btn-secondary" onclick="goToStep(3)">Voltar</button>
+                <button class="btn btn-success" onclick="goToStep(5)">Iniciar Disparo</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Dispatch -->
+        <div id="step5" class="hidden">
+            <div class="panel">
+                <div class="dispatch-controls">
+                    <button class="btn btn-secondary" id="btnPause" onclick="pauseDispatch()">Pausar</button>
+                    <button class="btn btn-primary hidden" id="btnResume" onclick="resumeDispatch()">Retomar</button>
+                    <button class="btn btn-danger" id="btnStop" onclick="stopDispatch()">Parar</button>
+                </div>
+                <div class="progress-info">
+                    <span id="progressLabel">0 de 0</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card" style="background:var(--accent-light)"><div class="stat-val" id="statTotal">0</div><div class="stat-lbl">Total</div></div>
+                    <div class="stat-card" style="background:var(--green-light)"><div class="stat-val" id="statSent">0</div><div class="stat-lbl">Enviados</div></div>
+                    <div class="stat-card" style="background:var(--red-light)"><div class="stat-val" id="statErrors">0</div><div class="stat-lbl">Erros</div></div>
+                    <div class="stat-card" style="background:var(--orange-light)"><div class="stat-val" id="statRemaining">0</div><div class="stat-lbl">Restantes</div></div>
+                </div>
+                <div class="dispatch-log" id="dispatchLog"></div>
+            </div>
+            <div class="step-actions hidden" id="completionActions">
+                <button class="btn btn-secondary" onclick="resetAll()">Novo Disparo</button>
+                <button class="btn btn-primary" onclick="downloadReport()">Baixar Relatorio</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ========================================
+// STATE
+// ========================================
+const STEPS = ['Inbox', 'Modelos', 'Contatos', 'Config', 'Disparo'];
+const state = {
+    apiUrl: '', accountId: '', apiToken: '', clientSlug: '', darkMode: false,
+    currentStep: 1,
+    inboxes: [], selectedInbox: null,
+    templates: [],
+    contactSource: 'upload',
+    contacts: [],
+    fileColumns: [], fileData: [], mapping: {},
+    searchSelected: {},
+    dispatchInterval: 15,
+    dispatchState: 'idle',
+    currentIndex: 0, templateIndex: 0,
+    results: [],
+    stats: { total: 0, sent: 0, errors: 0 },
+    dispatchTimer: null,
+    // Permissões de usuário
+    currentUser: null,
+    isAdmin: false
+};
+const AVATAR_COLORS = ['#4f6ef7','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316','#6366f1','#06b6d4'];
+
+// ========================================
+// THEME
+// ========================================
+function detectTheme() { const s = localStorage.getItem('kanban_theme'); return s ? s === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches; }
+function applyTheme(dark) {
+    state.darkMode = dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    localStorage.setItem('kanban_theme', dark ? 'dark' : 'light');
+    const icon = document.getElementById('themeIcon');
+    if (icon) icon.innerHTML = dark ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>' : '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+}
+function toggleTheme() { applyTheme(!state.darkMode); }
+
+// ========================================
+// INIT
+// ========================================
+let chatwootUserResolved = false;
+
+async function init() {
+    applyTheme(detectTheme());
+    if (window.CLIENT_CONFIG) {
+        state.apiUrl = window.CLIENT_CONFIG.apiUrl;
+        state.accountId = window.CLIENT_CONFIG.accountId;
+        state.apiToken = window.CLIENT_CONFIG.apiToken;
+        const pp = window.location.pathname.split('/').filter(p => p);
+        state.clientSlug = pp[0] === 'disparador' ? (pp[1] || '') : (pp[0] || '');
+    }
+
+    // Listen for Chatwoot context (user info, dark mode)
+    window.addEventListener('message', async (e) => {
+        let messageData = e.data;
+
+        // Chatwoot pode enviar como string JSON - fazer parse
+        if (typeof messageData === 'string') {
+            try {
+                messageData = JSON.parse(messageData);
+            } catch (err) {
+                return;
+            }
+        }
+
+        console.log('Received message (parsed):', messageData);
+
+        if (messageData && typeof messageData === 'object') {
+            const eventName = messageData.event || messageData.type;
+            const eventData = messageData.data || messageData;
+
+            if ((eventName === 'appContext' || eventData.currentAgent || eventData.current_agent) && !chatwootUserResolved) {
+                chatwootUserResolved = true;
+                console.log('Chatwoot appContext received:', eventData);
+
+                if (eventData.darkMode !== undefined) {
+                    applyTheme(eventData.darkMode);
+                }
+
+                const chatwootUser = eventData.currentAgent
+                    || eventData.current_agent
+                    || eventData.user
+                    || eventData.contact
+                    || (eventData.conversation && eventData.conversation.meta && eventData.conversation.meta.assignee);
+
+                console.log('Chatwoot user found:', chatwootUser);
+
+                if (chatwootUser && (chatwootUser.id || chatwootUser.user_id)) {
+                    const userId = chatwootUser.id || chatwootUser.user_id;
+                    console.log('Authenticating user ID:', userId);
+                    await authenticateFromChatwoot({ ...chatwootUser, id: userId });
+                    return;
+                }
+
+                console.log('No user found in appContext, falling back to checkUserAuth');
+                await checkUserAuth();
+            }
+        }
+    });
+
+    // Solicitar contexto do Chatwoot
+    try {
+        window.parent.postMessage('chatwoot-dashboard-app:fetch-info', '*');
+    } catch(e) {}
+
+    // Timeout: se não receber resposta do Chatwoot em 2s, assumir que está rodando standalone
+    setTimeout(async () => {
+        if (!chatwootUserResolved) {
+            chatwootUserResolved = true;
+            console.log('Running standalone (not inside Chatwoot)');
+            await checkUserAuth();
+        }
+    }, 2000);
+}
+
+async function authenticateFromChatwoot(chatwootUser) {
+    try {
+        // Buscar permissões do usuário pelo ID do Chatwoot
+        const res = await fetch('/api/' + state.clientSlug + '/user-permissions/' + chatwootUser.id);
+        const perm = await res.json();
+
+        if (perm.found) {
+            state.currentUser = {
+                id: perm.chatwoot_user_id,
+                name: perm.user_name || chatwootUser.name || chatwootUser.available_name
+            };
+            state.isAdmin = perm.is_admin;
+        } else {
+            // Usuário não está cadastrado - dar acesso (primeira vez)
+            state.currentUser = {
+                id: chatwootUser.id,
+                name: chatwootUser.name || chatwootUser.available_name || 'Usuário'
+            };
+            state.isAdmin = chatwootUser.role === 'administrator' || true;
+        }
+
+        // Salvar na sessão
+        sessionStorage.setItem('disparador_user_' + state.clientSlug, JSON.stringify({
+            id: state.currentUser.id,
+            name: state.currentUser.name,
+            is_admin: state.isAdmin
+        }));
+
+        continueInit();
+    } catch (e) {
+        console.error('Erro ao autenticar via Chatwoot:', e);
+        state.currentUser = { id: chatwootUser.id, name: chatwootUser.name || 'Usuário' };
+        state.isAdmin = true;
+        continueInit();
+    }
+}
+
+async function checkUserAuth() {
+    // Verificar se tem usuário salvo na sessão (standalone mode)
+    const savedUser = sessionStorage.getItem('disparador_user_' + state.clientSlug);
+    if (savedUser) {
+        const user = JSON.parse(savedUser);
+        state.currentUser = user;
+        state.isAdmin = user.is_admin;
+        continueInit();
+        return;
+    }
+
+    // Modo standalone: mostrar seleção de usuários
+    if (state.clientSlug) {
+        try {
+            const res = await fetch('/api/' + state.clientSlug + '/users');
+            const users = await res.json();
+            if (users && users.length > 0) {
+                showUserSelection(users);
+                return;
+            }
+        } catch (e) {
+            console.warn('Não foi possível carregar usuários:', e.message);
+        }
+    }
+
+    // Se não tem usuários configurados, continua direto
+    state.isAdmin = true;
+    continueInit();
+}
+
+function showUserSelection(users) {
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('userSelectState').style.display = 'flex';
+    const container = document.getElementById('userList');
+    container.innerHTML = users.map(u => `
+        <button onclick="selectUser(${u.id}, '${(u.name || '').replace(/'/g, "\\'")}', ${u.is_admin})"
+            style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 24px;background:var(--bg-card);border:1px solid var(--border-card);border-radius:var(--radius);cursor:pointer;transition:var(--transition);min-width:140px"
+            onmouseover="this.style.borderColor='var(--accent)';this.style.transform='translateY(-2px)'"
+            onmouseout="this.style.borderColor='var(--border-card)';this.style.transform='translateY(0)'">
+            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,${AVATAR_COLORS[u.id % AVATAR_COLORS.length]},${AVATAR_COLORS[(u.id + 3) % AVATAR_COLORS.length]});display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700">
+                ${(u.name || 'U').charAt(0).toUpperCase()}
+            </div>
+            <span style="font-size:14px;font-weight:600;color:var(--text-primary)">${u.name || 'Sem nome'}</span>
+            <span style="font-size:11px;color:var(--text-muted);padding:2px 8px;background:var(--bg-badge);border-radius:4px">
+                ${u.role === 'administrator' ? 'Admin' : 'Agente'}
+            </span>
+        </button>
+    `).join('');
+}
+
+function selectUser(userId, userName, isAdmin) {
+    state.currentUser = { id: userId, name: userName };
+    state.isAdmin = isAdmin;
+
+    sessionStorage.setItem('disparador_user_' + state.clientSlug, JSON.stringify({
+        id: userId, name: userName, is_admin: isAdmin
+    }));
+
+    document.getElementById('userSelectState').style.display = 'none';
+    continueInit();
+}
+
+function changeUser() {
+    sessionStorage.removeItem('disparador_user_' + state.clientSlug);
+    window.location.reload();
+}
+
+function continueInit() {
+    document.getElementById('mainContent').style.display = 'block';
+    updateUserBadge();
+    renderStepBar();
+    loadInboxes();
+}
+
+function updateUserBadge() {
+    const badge = document.getElementById('userBadge');
+    const nameSpan = document.getElementById('userBadgeName');
+    if (state.currentUser && state.currentUser.name && badge && nameSpan) {
+        nameSpan.textContent = state.currentUser.name;
+        badge.style.display = 'flex';
+    }
+}
+
+// ========================================
+// API
+// ========================================
+async function api(endpoint, method = 'GET', body = null) {
+    let url, options;
+    if (window.CLIENT_CONFIG && state.clientSlug) {
+        url = '/api/' + state.clientSlug + endpoint;
+        options = { method, headers: { 'Content-Type': 'application/json' } };
+    } else {
+        url = state.apiUrl + '/api/v1/accounts/' + state.accountId + endpoint;
+        options = { method, headers: { 'api_access_token': state.apiToken, 'Content-Type': 'application/json' } };
+    }
+    if (body) options.body = JSON.stringify(body);
+    const res = await fetch(url, options);
+    if (!res.ok) throw new Error('API ' + res.status);
+    return res.json();
+}
+
+async function sendMediaMessage(convId, content, mediaFile) {
+    const fd = new FormData();
+    if (content) fd.append('content', content);
+    fd.append('message_type', 'outgoing');
+    if (mediaFile) fd.append('attachments[]', mediaFile);
+    const url = '/api/' + state.clientSlug + '/conversations/' + convId + '/messages/upload';
+    const res = await fetch(url, { method: 'POST', body: fd });
+    if (!res.ok) throw new Error('Upload ' + res.status);
+    return res.json();
+}
+
+// ========================================
+// NAVIGATION
+// ========================================
+function renderStepBar() {
+    const bar = document.getElementById('stepBar');
+    bar.innerHTML = STEPS.map((name, i) => {
+        const num = i + 1;
+        const cls = num < state.currentStep ? 'done' : (num === state.currentStep ? 'active' : '');
+        const lineCls = i < state.currentStep - 1 ? 'done' : '';
+        return (i > 0 ? '<div class="step-line ' + lineCls + '"></div>' : '') +
+            '<div class="step-item"><div class="step-num ' + cls + '">' + (cls === 'done' ? '&#10003;' : num) + '</div><div class="step-label">' + name + '</div></div>';
+    }).join('');
+}
+
+function goToStep(n) {
+    if (n > state.currentStep && !validateStep(state.currentStep)) return;
+    for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById('step' + i);
+        if (el) el.classList.toggle('hidden', i !== n);
+    }
+    state.currentStep = n;
+    renderStepBar();
+    if (n === 2 && state.templates.length === 0) addTemplate();
+    if (n === 4) updateSummary();
+    if (n === 5) startDispatch();
+}
+
+function validateStep(s) {
+    switch (s) {
+        case 1: if (!state.selectedInbox) { alert('Selecione uma caixa de entrada'); return false; } return true;
+        case 2:
+            if (state.templates.length === 0) { alert('Adicione pelo menos um modelo'); return false; }
+            if (state.templates.some(t => !t.content && !t.mediaFile)) { alert('Cada modelo precisa de texto ou midia'); return false; }
+            return true;
+        case 3: if (state.contacts.length === 0) { alert('Selecione pelo menos um contato'); return false; } return true;
+        case 4: state.dispatchInterval = Math.max(15, parseInt(document.getElementById('intervalInput').value) || 15); return true;
+        default: return true;
+    }
+}
+
+// ========================================
+// STEP 1: INBOX
+// ========================================
+async function loadInboxes() {
+    try {
+        const data = await api('/inboxes');
+        state.inboxes = data.payload || data || [];
+        renderInboxes();
+    } catch (e) {
+        document.getElementById('inboxGrid').innerHTML = '<p style="color:var(--red-text)">Erro ao carregar inboxes: ' + esc(e.message) + '</p>';
+    }
+}
+
+function renderInboxes() {
+    const grid = document.getElementById('inboxGrid');
+    if (state.inboxes.length === 0) { grid.innerHTML = '<p style="color:var(--text-muted)">Nenhuma caixa de entrada encontrada</p>'; return; }
+    grid.innerHTML = state.inboxes.map(inbox => {
+        const sel = state.selectedInbox?.id === inbox.id ? 'selected' : '';
+        const type = inbox.channel_type?.replace('Channel::', '') || 'API';
+        return '<div class="inbox-card ' + sel + '" onclick="selectInbox(' + inbox.id + ')">' +
+            '<div class="inbox-name">' + esc(inbox.name) + '</div>' +
+            '<div class="inbox-type">' + esc(type) + ' &middot; ID: ' + inbox.id + '</div></div>';
+    }).join('');
+}
+
+function selectInbox(id) {
+    state.selectedInbox = state.inboxes.find(i => i.id === id);
+    renderInboxes();
+    document.getElementById('btnNext1').disabled = false;
+}
+
+// ========================================
+// STEP 2: TEMPLATES
+// ========================================
+function addTemplate() {
+    state.templates.push({ id: 'tpl_' + Date.now(), content: '', mediaFile: null, mediaType: null, mediaPreviewUrl: null, mediaFileName: null });
+    renderTemplates();
+}
+
+function removeTemplate(id) {
+    const t = state.templates.find(t => t.id === id);
+    if (t && t.mediaPreviewUrl) URL.revokeObjectURL(t.mediaPreviewUrl);
+    state.templates = state.templates.filter(t => t.id !== id);
+    renderTemplates();
+}
+
+function renderTemplates() {
+    const c = document.getElementById('templatesContainer');
+    c.innerHTML = state.templates.map((t, i) => {
+        let mediaHtml = '';
+        if (t.mediaFile) {
+            const icon = t.mediaType === 'image' ? '<img src="' + t.mediaPreviewUrl + '">' : '';
+            const typeLabel = { image: 'Imagem', audio: 'Audio', video: 'Video' }[t.mediaType] || 'Arquivo';
+            mediaHtml = '<div class="media-zone has-file" onclick="document.getElementById(\'media_' + t.id + '\').click()"><div class="media-preview">' +
+                icon + '<div class="media-info"><div class="media-name">' + esc(t.mediaFileName) + '</div><div>' + typeLabel + '</div></div></div></div>';
+        } else {
+            mediaHtml = '<div class="media-zone" onclick="document.getElementById(\'media_' + t.id + '\').click()">Clique para adicionar imagem, audio ou video</div>';
+        }
+        return '<div class="tpl-card"><div class="tpl-badge">' + (i + 1) + '</div>' +
+            (state.templates.length > 1 ? '<button class="btn btn-danger btn-sm tpl-remove" onclick="removeTemplate(\'' + t.id + '\')">Remover</button>' : '') +
+            '<div class="form-group"><label class="form-label">Texto da mensagem</label>' +
+            '<textarea class="form-input" placeholder="Ola {nome}, tudo bem? ..." oninput="updateTplContent(\'' + t.id + '\',this.value)">' + esc(t.content) + '</textarea></div>' +
+            '<div class="form-group"><label class="form-label">Midia (opcional)</label>' + mediaHtml +
+            '<input type="file" id="media_' + t.id + '" accept="image/*,audio/*,video/*" style="display:none" onchange="handleTplMedia(\'' + t.id + '\',this.files[0])"></div></div>';
+    }).join('');
+    validateTemplates();
+}
+
+function updateTplContent(id, val) {
+    const t = state.templates.find(t => t.id === id);
+    if (t) t.content = val;
+    validateTemplates();
+}
+
+function handleTplMedia(id, file) {
+    if (!file) return;
+    const t = state.templates.find(t => t.id === id);
+    if (!t) return;
+    const mime = file.type;
+    if (mime.startsWith('image/')) t.mediaType = 'image';
+    else if (mime.startsWith('audio/')) t.mediaType = 'audio';
+    else if (mime.startsWith('video/')) t.mediaType = 'video';
+    else { alert('Tipo nao suportado. Use imagem, audio ou video.'); return; }
+    t.mediaFile = file;
+    t.mediaFileName = file.name;
+    if (t.mediaPreviewUrl) URL.revokeObjectURL(t.mediaPreviewUrl);
+    t.mediaPreviewUrl = URL.createObjectURL(file);
+    renderTemplates();
+}
+
+function validateTemplates() {
+    const valid = state.templates.length > 0 && state.templates.every(t => t.content || t.mediaFile);
+    document.getElementById('btnNext2').disabled = !valid;
+}
+
+// ========================================
+// STEP 3: CONTACTS
+// ========================================
+function setContactSource(src) {
+    state.contactSource = src;
+    document.querySelectorAll('.source-tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && src === 'upload') || (i === 1 && src === 'chatwoot')));
+    document.getElementById('contactUploadArea').classList.toggle('hidden', src !== 'upload');
+    document.getElementById('contactSearchArea').classList.toggle('hidden', src !== 'chatwoot');
+}
+
+function handleContactFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const wb = XLSX.read(e.target.result, { type: 'binary' });
+            const sheet = wb.Sheets[wb.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            state.fileColumns = (json[0] || []).map(c => String(c || 'Coluna'));
+            state.fileData = json.slice(1).filter(r => r.some(c => c));
+            state.mapping = {};
+            state.fileColumns.forEach(col => { state.mapping[col] = autoDetect(col); });
+            renderMapping();
+        } catch (err) { alert('Erro ao ler arquivo: ' + err.message); }
+    };
+    reader.readAsBinaryString(file);
+}
+
+function autoDetect(col) {
+    const n = col.toLowerCase();
+    if (n.includes('nome') || n.includes('name')) return 'name';
+    if (n.includes('telefone') || n.includes('phone') || n.includes('celular') || n.includes('whatsapp') || n.includes('fone')) return 'phone_number';
+    if (n.includes('email') || n.includes('e-mail')) return 'email';
+    return '';
+}
+
+function renderMapping() {
+    const area = document.getElementById('mappingArea');
+    area.classList.remove('hidden');
+    const opts = '<option value="">Ignorar</option><option value="name">Nome</option><option value="phone_number">Telefone</option><option value="email">Email</option>';
+    area.innerHTML = '<table class="map-table"><thead><tr><th>Coluna</th><th>Mapear para</th><th>Amostra</th></tr></thead><tbody>' +
+        state.fileColumns.map((col, i) => {
+            const sample = state.fileData.slice(0, 2).map(r => esc(String(r[i] || ''))).join(', ');
+            return '<tr><td>' + esc(col) + '</td><td><select onchange="state.mapping[\'' + esc(col) + '\']=this.value;buildContacts()">' +
+                opts.replace('value="' + (state.mapping[col] || '') + '"', 'value="' + (state.mapping[col] || '') + '" selected') +
+                '</select></td><td style="color:var(--text-muted);font-size:12px">' + sample + '</td></tr>';
+        }).join('') + '</tbody></table>' +
+        '<div style="margin-top:12px"><button class="btn btn-primary btn-sm" onclick="buildContacts()">Confirmar Mapeamento</button></div>';
+}
+
+function buildContacts() {
+    const colMap = {};
+    state.fileColumns.forEach((col, i) => { if (state.mapping[col]) colMap[state.mapping[col]] = i; });
+    if (colMap.phone_number === undefined && colMap.name === undefined) { alert('Mapeie pelo menos Nome ou Telefone'); return; }
+
+    state.contacts = state.fileData.map(row => ({
+        name: colMap.name !== undefined ? String(row[colMap.name] || '') : '',
+        phone_number: colMap.phone_number !== undefined ? String(row[colMap.phone_number] || '') : '',
+        email: colMap.email !== undefined ? String(row[colMap.email] || '') : '',
+        chatwootId: null
+    })).filter(c => c.phone_number || c.name);
+
+    document.getElementById('contactsSummary').classList.remove('hidden');
+    document.getElementById('contactCount').textContent = state.contacts.length;
+    document.getElementById('btnNext3').disabled = state.contacts.length === 0;
+}
+
+let searchTimeout;
+function debounceSearch(q) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => searchChatwoot(q), 400);
+}
+
+async function searchChatwoot(q) {
+    if (!q || q.length < 2) { document.getElementById('searchResults').innerHTML = ''; return; }
+    try {
+        const data = await api('/contacts/search?q=' + encodeURIComponent(q) + '&page=1');
+        const contacts = data.payload || data || [];
+        document.getElementById('searchResults').innerHTML = contacts.map(c => {
+            const checked = state.searchSelected[c.id] ? 'checked' : '';
+            return '<label style="display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border-primary);cursor:pointer">' +
+                '<input type="checkbox" ' + checked + ' onchange="toggleSearchContact(' + c.id + ',this.checked,\'' + esc(c.name || '') + '\',\'' + esc(c.phone_number || '') + '\',\'' + esc(c.email || '') + '\')" style="width:18px;height:18px;accent-color:var(--accent)">' +
+                '<div><div style="font-size:13px;font-weight:600;color:var(--text-primary)">' + esc(c.name || 'Sem nome') + '</div>' +
+                '<div style="font-size:11px;color:var(--text-muted)">' + esc(c.phone_number || '') + (c.email ? ' | ' + esc(c.email) : '') + '</div></div></label>';
+        }).join('') || '<p style="padding:16px;color:var(--text-muted);text-align:center">Nenhum resultado</p>';
+    } catch (e) { document.getElementById('searchResults').innerHTML = '<p style="color:var(--red-text);padding:12px">Erro: ' + esc(e.message) + '</p>'; }
+}
+
+function toggleSearchContact(id, checked, name, phone, email) {
+    if (checked) {
+        state.searchSelected[id] = { name, phone_number: phone, email, chatwootId: id };
+    } else {
+        delete state.searchSelected[id];
+    }
+    state.contacts = Object.values(state.searchSelected);
+    document.getElementById('contactsSummary').classList.toggle('hidden', state.contacts.length === 0);
+    document.getElementById('contactCount').textContent = state.contacts.length;
+    document.getElementById('btnNext3').disabled = state.contacts.length === 0;
+}
+
+// ========================================
+// STEP 4: SUMMARY
+// ========================================
+function updateSummary() {
+    state.dispatchInterval = Math.max(15, parseInt(document.getElementById('intervalInput').value) || 15);
+    const total = state.contacts.length;
+    const tpls = state.templates.length;
+    const totalSec = total * state.dispatchInterval;
+    const mins = Math.ceil(totalSec / 60);
+
+    document.getElementById('summaryGrid').innerHTML =
+        '<div class="summary-card" style="background:var(--accent-light)"><div class="val" style="color:var(--accent-text)">' + total + '</div><div class="lbl">Contatos</div></div>' +
+        '<div class="summary-card" style="background:var(--purple-light)"><div class="val" style="color:var(--purple)">' + tpls + '</div><div class="lbl">Modelos</div></div>' +
+        '<div class="summary-card" style="background:var(--orange-light)"><div class="val" style="color:var(--orange-text)">' + mins + ' min</div><div class="lbl">Tempo est.</div></div>';
+}
+
+// ========================================
+// STEP 5: DISPATCH ENGINE
+// ========================================
+function addLog(text, cls = '') {
+    const log = document.getElementById('dispatchLog');
+    const time = new Date().toLocaleTimeString('pt-BR');
+    log.innerHTML += '<div class="log-line ' + cls + '">[' + time + '] ' + esc(text) + '</div>';
+    log.scrollTop = log.scrollHeight;
+}
+
+function updateProgress() {
+    const total = state.stats.total;
+    const done = state.stats.sent + state.stats.errors;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('progressLabel').textContent = done + ' de ' + total;
+    document.getElementById('progressPercent').textContent = pct + '%';
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statSent').textContent = state.stats.sent;
+    document.getElementById('statErrors').textContent = state.stats.errors;
+    document.getElementById('statRemaining').textContent = total - done;
+}
+
+async function startDispatch() {
+    state.dispatchState = 'running';
+    state.currentIndex = 0;
+    state.templateIndex = 0;
+    state.stats = { total: state.contacts.length, sent: 0, errors: 0 };
+    state.results = [];
+    document.getElementById('dispatchLog').innerHTML = '';
+    document.getElementById('btnPause').classList.remove('hidden');
+    document.getElementById('btnResume').classList.add('hidden');
+    document.getElementById('btnStop').classList.remove('hidden');
+    document.getElementById('completionActions').classList.add('hidden');
+    updateProgress();
+    addLog('Disparo iniciado! ' + state.contacts.length + ' contatos, ' + state.templates.length + ' modelos, intervalo ' + state.dispatchInterval + 's', 'info');
+    processNext();
+}
+
+function formatPhone(phone) {
+    let p = String(phone).replace(/\D/g, '');
+    if (p.length === 11 || p.length === 10) p = '55' + p;
+    if (!p.startsWith('+')) p = '+' + p;
+    return p;
+}
+
+function processVars(content, contact) {
+    return content.replace(/{nome}/gi, contact.name || '').replace(/{telefone}/gi, contact.phone_number || '').replace(/{email}/gi, contact.email || '').replace(/{data}/gi, new Date().toLocaleDateString('pt-BR'));
+}
+
+async function processNext() {
+    if (state.dispatchState === 'paused') return;
+    if (state.currentIndex >= state.contacts.length) {
+        finishDispatch();
+        return;
+    }
+
+    const contact = state.contacts[state.currentIndex];
+    const template = state.templates[state.templateIndex];
+    const label = contact.name || contact.phone_number;
+
+    try {
+        addLog('[' + (state.currentIndex + 1) + '/' + state.stats.total + '] ' + label + ' (Modelo ' + (state.templateIndex + 1) + ')', 'info');
+
+        // A: Find or create contact
+        let contactId = contact.chatwootId;
+        if (!contactId && contact.phone_number) {
+            try {
+                const data = await api('/contacts/search?q=' + encodeURIComponent(contact.phone_number));
+                const results = data.payload || data || [];
+                const formatted = formatPhone(contact.phone_number).replace(/\D/g, '');
+                const found = results.find(c => { const cp = (c.phone_number || '').replace(/\D/g, ''); return cp.includes(formatted) || formatted.includes(cp); });
+                if (found) { contactId = found.id; addLog('  Contato existente (ID: ' + contactId + ')', 'dim'); }
+            } catch (e) { /* search failed, will create */ }
+        }
+
+        if (!contactId) {
+            const created = await api('/contacts', 'POST', {
+                inbox_id: state.selectedInbox.id,
+                name: contact.name || contact.phone_number,
+                phone_number: contact.phone_number ? formatPhone(contact.phone_number) : undefined,
+                email: contact.email || undefined
+            });
+            contactId = created.payload?.contact?.id || created.id;
+            addLog('  Contato criado (ID: ' + contactId + ')', 'success');
+        }
+
+        // B: Create conversation
+        const conv = await api('/conversations', 'POST', {
+            inbox_id: state.selectedInbox.id,
+            contact_id: contactId
+        });
+        const convId = conv.id;
+
+        // C: Send message (texto e mídia SEPARADOS)
+        const processedContent = template.content ? processVars(template.content, contact) : '';
+
+        if (processedContent) {
+            await api('/conversations/' + convId + '/messages', 'POST', {
+                content: processedContent,
+                message_type: 'outgoing'
+            });
+            addLog('  Texto enviado', 'success');
+        }
+
+        if (template.mediaFile) {
+            await sendMediaMessage(convId, null, template.mediaFile);
+            addLog('  Midia enviada', 'success');
+        }
+
+        state.stats.sent++;
+        state.results.push({ index: state.currentIndex, status: 'ok', contact: label, tpl: state.templateIndex + 1, convId });
+
+    } catch (error) {
+        state.stats.errors++;
+        state.results.push({ index: state.currentIndex, status: 'error', contact: label, tpl: state.templateIndex + 1, error: error.message });
+        addLog('  ERRO: ' + error.message, 'error');
+    }
+
+    state.templateIndex = (state.templateIndex + 1) % state.templates.length;
+    state.currentIndex++;
+    updateProgress();
+
+    if (state.currentIndex < state.contacts.length && state.dispatchState === 'running') {
+        addLog('  Aguardando ' + state.dispatchInterval + 's...', 'dim');
+        state.dispatchTimer = setTimeout(processNext, state.dispatchInterval * 1000);
+    } else if (state.currentIndex >= state.contacts.length) {
+        finishDispatch();
+    }
+}
+
+function finishDispatch() {
+    state.dispatchState = 'completed';
+    document.getElementById('btnPause').classList.add('hidden');
+    document.getElementById('btnResume').classList.add('hidden');
+    document.getElementById('btnStop').classList.add('hidden');
+    document.getElementById('completionActions').classList.remove('hidden');
+    addLog('Disparo finalizado! ' + state.stats.sent + ' enviados, ' + state.stats.errors + ' erros.', 'success');
+    updateProgress();
+}
+
+function pauseDispatch() {
+    state.dispatchState = 'paused';
+    if (state.dispatchTimer) { clearTimeout(state.dispatchTimer); state.dispatchTimer = null; }
+    document.getElementById('btnPause').classList.add('hidden');
+    document.getElementById('btnResume').classList.remove('hidden');
+    addLog('Pausado pelo usuario', 'warning');
+}
+
+function resumeDispatch() {
+    state.dispatchState = 'running';
+    document.getElementById('btnPause').classList.remove('hidden');
+    document.getElementById('btnResume').classList.add('hidden');
+    addLog('Retomado', 'info');
+    processNext();
+}
+
+function stopDispatch() {
+    if (!confirm('Tem certeza que deseja parar o disparo?')) return;
+    state.dispatchState = 'completed';
+    if (state.dispatchTimer) { clearTimeout(state.dispatchTimer); state.dispatchTimer = null; }
+    finishDispatch();
+}
+
+function downloadReport() {
+    let csv = 'Contato,Status,Modelo,Conversa,Erro\n';
+    state.results.forEach(r => {
+        csv += '"' + (r.contact || '') + '","' + r.status + '","' + r.tpl + '","' + (r.convId || '') + '","' + (r.error || '') + '"\n';
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'relatorio_disparo_' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+}
+
+function resetAll() {
+    state.currentStep = 1;
+    state.contacts = [];
+    state.templates = [];
+    state.searchSelected = {};
+    state.dispatchState = 'idle';
+    state.results = [];
+    goToStep(1);
+}
+
+// ========================================
+// UTILS
+// ========================================
+function esc(text) { const d = document.createElement('div'); d.textContent = text || ''; return d.innerHTML; }
+
+window.addEventListener('beforeunload', (e) => {
+    if (state.dispatchState === 'running' || state.dispatchState === 'paused') {
+        e.preventDefault();
+        e.returnValue = 'Disparo em andamento!';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

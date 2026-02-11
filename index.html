@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Importador de Contatos - Kanban</title>
+    <title>Importador de Contatos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -33,8 +33,12 @@
             border-color: #3b82f6 !important;
             background-color: #eff6ff !important;
         }
-        .config-auto {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        .label-chip {
+            transition: all 0.2s;
+        }
+        .label-chip.selected {
+            ring: 2px;
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -47,15 +51,15 @@
                 <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
-                Importador de Contatos para Kanban
+                Importador de Contatos
             </h1>
-            <p class="text-gray-600 mt-2">Importe contatos em massa e adicione diretamente ao seu funil de vendas</p>
+            <p class="text-gray-600 mt-2">Importe contatos em massa e etiquete automaticamente as conversas</p>
 
             <!-- Connection Status -->
             <div id="connectionStatus" class="mt-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200 hidden">
                 <div class="flex items-center gap-2">
                     <div class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></div>
-                    <span class="text-yellow-700 text-sm" id="connectionText">Verificando conexão...</span>
+                    <span class="text-yellow-700 text-sm" id="connectionText">Verificando conexao...</span>
                 </div>
             </div>
         </div>
@@ -67,7 +71,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
-                    <p class="font-bold">Configuração Automática Detectada!</p>
+                    <p class="font-bold">Configuracao Automatica Detectada!</p>
                     <p class="text-sm opacity-90" id="autoConfigDetails">Conectado como: </p>
                 </div>
             </div>
@@ -78,7 +82,7 @@
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
                     <div id="step1-indicator" class="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
-                    <span class="ml-2 font-medium text-gray-700">Configuração</span>
+                    <span class="ml-2 font-medium text-gray-700">Configuracao</span>
                 </div>
                 <div class="flex-1 h-1 bg-gray-300 mx-4" id="progress-line-1"></div>
                 <div class="flex items-center">
@@ -106,7 +110,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
-                    Configuração da API
+                    Configuracao da API
                     <span id="configSourceBadge" class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full ml-2 hidden"></span>
                 </h2>
 
@@ -115,7 +119,6 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">URL Base da API</label>
                         <input type="text" id="apiUrl" placeholder="https://seu-chatwoot.com"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <p class="text-xs text-gray-500 mt-1">Ex: https://app.chatwoot.com ou sua instância</p>
                     </div>
 
                     <div>
@@ -137,18 +140,16 @@
                                 </svg>
                             </button>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Encontre em: Perfil → Access Token</p>
                     </div>
 
-                    <!-- Save config checkbox -->
                     <div class="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                         <input type="checkbox" id="saveConfig" checked class="w-4 h-4 text-blue-600 rounded">
-                        <label for="saveConfig" class="text-sm text-blue-700">Salvar configuração para próximas vezes</label>
+                        <label for="saveConfig" class="text-sm text-blue-700">Salvar configuracao para proximas vezes</label>
                     </div>
 
                     <button onclick="loadConfiguration()" id="btnLoadConfig"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
-                        <span>Carregar Configurações</span>
+                        <span>Carregar Configuracoes</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
                         </svg>
@@ -156,7 +157,7 @@
                 </div>
             </div>
 
-            <!-- Inboxes Selection (appears after loading) -->
+            <!-- Inboxes Selection -->
             <div id="inboxesSection" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,74 +165,73 @@
                     </svg>
                     Selecione a Caixa de Entrada
                 </h2>
-                <div id="inboxesList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <!-- Inboxes will be loaded here -->
-                </div>
+                <div id="inboxesList" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
             </div>
 
-            <!-- Funnels Selection (appears after loading) -->
-            <div id="funnelsSection" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+            <!-- Labels Selection -->
+            <div id="labelsSection" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                     </svg>
-                    Adicionar ao Kanban (Opcional)
+                    Etiquetas (Labels)
+                    <span class="text-sm font-normal text-gray-500">- Selecione as etiquetas para as conversas</span>
                 </h2>
 
                 <div class="mb-4">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="enableKanban" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="text-gray-700 font-medium">Adicionar contatos ao Kanban</span>
+                        <input type="checkbox" id="enableLabels" class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                        <span class="text-gray-700 font-medium">Adicionar etiquetas nas conversas importadas</span>
                     </label>
                 </div>
 
-                <div id="kanbanOptions" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Selecione o Funil</label>
-                        <div id="funnelsList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <!-- Funnels will be loaded here -->
-                        </div>
+                <div id="labelsOptions" class="hidden">
+                    <div id="labelsList" class="flex flex-wrap gap-2 mb-4"></div>
+
+                    <div id="noLabelsMsg" class="hidden p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-yellow-700 text-sm">Nenhuma etiqueta encontrada. Crie etiquetas no Chatwoot em: Configuracoes > Etiquetas</p>
                     </div>
 
-                    <div id="stagesSection" class="hidden">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Selecione a Etapa</label>
-                        <div id="stagesList" class="grid grid-cols-2 md:grid-cols-3 gap-3">
-                            <!-- Stages will be loaded here -->
-                        </div>
-                    </div>
-
-                    <!-- Opções avançadas do Kanban -->
-                    <div class="border-t pt-4 mt-4">
-                        <label class="flex items-center gap-2 cursor-pointer mb-3">
-                            <input type="checkbox" id="skipExisting" class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500">
-                            <span class="text-sm text-gray-700">Não criar duplicados (usar contato existente se telefone já cadastrado)</span>
-                        </label>
+                    <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                        <p class="text-sm text-gray-600">
+                            <strong>Selecionadas:</strong> <span id="selectedLabelsCount">0</span> etiqueta(s)
+                        </p>
+                        <div id="selectedLabelsList" class="flex flex-wrap gap-1 mt-2"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Opção de Mensagem Privada (SEMPRE VISÍVEL após carregar config) -->
-            <div id="privateNoteSection" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
+            <!-- Opcoes Avancadas -->
+            <div id="advancedSection" class="bg-white rounded-lg shadow-md p-6 mb-6 hidden">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
                     </svg>
-                    Mensagem Privada (Opcional)
+                    Opcoes Avancadas
                 </h2>
 
+                <!-- Skip Duplicates -->
                 <div class="mb-4">
                     <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" id="enablePrivateNote" class="w-5 h-5 text-orange-600 rounded focus:ring-orange-500">
-                        <span class="text-gray-700 font-medium">Criar nota interna em cada conversa</span>
+                        <input type="checkbox" id="skipExisting" class="w-5 h-5 text-purple-600 rounded focus:ring-purple-500">
+                        <span class="text-gray-700 font-medium">Nao criar duplicados</span>
                     </label>
+                    <p class="text-xs text-gray-500 ml-7">Se o telefone ja existir, usa o contato existente</p>
                 </div>
 
-                <div id="privateNoteOptions" class="hidden">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Mensagem privada para cada contato:</label>
-                    <textarea id="privateNoteMessage" rows="3"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Ex: Contato importado via planilha em {data}. Origem: {origem}"></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Variáveis disponíveis: {nome}, {telefone}, {email}, {empresa}, {data}</p>
+                <!-- Private Note -->
+                <div class="border-t pt-4">
+                    <label class="flex items-center gap-2 cursor-pointer mb-3">
+                        <input type="checkbox" id="enablePrivateNote" class="w-5 h-5 text-orange-600 rounded focus:ring-orange-500">
+                        <span class="text-gray-700 font-medium">Criar nota privada em cada conversa</span>
+                    </label>
+
+                    <div id="privateNoteOptions" class="hidden ml-7">
+                        <textarea id="privateNoteMessage" rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            placeholder="Ex: Contato importado via planilha em {data}. Origem: {origem}"></textarea>
+                        <p class="text-xs text-gray-500 mt-1">Variaveis: {nome}, {telefone}, {email}, {empresa}, {data}</p>
+                    </div>
                 </div>
             </div>
 
@@ -308,9 +308,7 @@
                 </h2>
                 <p class="text-gray-600 mb-4">Associe as colunas da sua planilha aos campos do Chatwoot</p>
 
-                <div id="mappingContainer" class="space-y-3">
-                    <!-- Mapping rows will be generated here -->
-                </div>
+                <div id="mappingContainer" class="space-y-3"></div>
             </div>
 
             <!-- Preview -->
@@ -405,19 +403,21 @@
             currentAgent: null,
             chatwootContext: null,
             selectedInbox: null,
-            selectedFunnel: null,
-            selectedStage: null,
-            enableKanban: false,
+            // Labels
+            enableLabels: false,
+            availableLabels: [],
+            selectedLabels: [],
+            // Options
             skipExisting: false,
             enablePrivateNote: false,
             privateNoteMessage: '',
+            // File
             fileData: [],
             fileColumns: [],
             mapping: {},
             inboxes: [],
-            funnels: [],
             importResults: [],
-            configSource: 'manual' // 'manual', 'url', 'localStorage', 'chatwoot'
+            configSource: 'manual'
         };
 
         // ========================================
@@ -436,9 +436,6 @@
             { value: 'custom:observacao', label: 'Observacao (custom)', required: false }
         ];
 
-        // ========================================
-        // CHANNEL TYPE ICONS
-        // ========================================
         const channelIcons = {
             'Channel::Whatsapp': '📱',
             'Channel::WebWidget': '💬',
@@ -453,91 +450,55 @@
         };
 
         // ========================================
-        // INITIALIZATION - Try to get config from multiple sources
+        // INITIALIZATION
         // ========================================
         function initializeApp() {
-            console.log('Initializing app...');
-
-            // 0. PRIORITY: Check for server-injected CLIENT_CONFIG (from admin panel)
+            // Server-injected config (from admin panel)
             if (window.CLIENT_CONFIG) {
-                console.log('Using server-injected config:', window.CLIENT_CONFIG.name);
                 document.getElementById('apiUrl').value = window.CLIENT_CONFIG.apiUrl;
                 document.getElementById('accountId').value = window.CLIENT_CONFIG.accountId;
                 document.getElementById('apiToken').value = window.CLIENT_CONFIG.apiToken;
                 state.configSource = 'server';
-
-                // Show auto-config banner
-                showAutoConfigBanner(`Cliente: ${window.CLIENT_CONFIG.name}`);
-
-                // Hide config section and auto-load
+                showAutoConfigBanner('Cliente: ' + window.CLIENT_CONFIG.name);
                 document.getElementById('step1').querySelector('.bg-white').style.display = 'none';
-                setTimeout(() => {
-                    loadConfiguration();
-                }, 300);
+                setTimeout(() => loadConfiguration(), 300);
                 return;
             }
 
-            // 1. Try URL parameters first (highest priority for Dashboard App)
+            // URL parameters
             const urlParams = new URLSearchParams(window.location.search);
-            const urlApiUrl = urlParams.get('api_url') || urlParams.get('apiUrl') || urlParams.get('base_url');
+            const urlApiUrl = urlParams.get('api_url') || urlParams.get('apiUrl');
             const urlAccountId = urlParams.get('account_id') || urlParams.get('accountId');
-            const urlApiToken = urlParams.get('api_token') || urlParams.get('apiToken') || urlParams.get('token');
+            const urlApiToken = urlParams.get('api_token') || urlParams.get('apiToken');
 
-            if (urlApiUrl) {
-                document.getElementById('apiUrl').value = urlApiUrl;
-                state.configSource = 'url';
-            }
-            if (urlAccountId) {
-                document.getElementById('accountId').value = urlAccountId;
-                state.configSource = 'url';
-            }
-            if (urlApiToken) {
-                document.getElementById('apiToken').value = urlApiToken;
-                state.configSource = 'url';
-            }
+            if (urlApiUrl) { document.getElementById('apiUrl').value = urlApiUrl; state.configSource = 'url'; }
+            if (urlAccountId) { document.getElementById('accountId').value = urlAccountId; state.configSource = 'url'; }
+            if (urlApiToken) { document.getElementById('apiToken').value = urlApiToken; state.configSource = 'url'; }
 
-            // 2. Try localStorage (saved config)
+            // LocalStorage
             const savedConfig = localStorage.getItem('chatwoot_importer_config');
             if (savedConfig) {
                 try {
                     const config = JSON.parse(savedConfig);
-                    if (!document.getElementById('apiUrl').value && config.apiUrl) {
-                        document.getElementById('apiUrl').value = config.apiUrl;
-                    }
-                    if (!document.getElementById('accountId').value && config.accountId) {
-                        document.getElementById('accountId').value = config.accountId;
-                    }
-                    if (!document.getElementById('apiToken').value && config.apiToken) {
-                        document.getElementById('apiToken').value = config.apiToken;
-                    }
-                    if (state.configSource !== 'url') {
-                        state.configSource = 'localStorage';
-                    }
-                } catch (e) {
-                    console.log('Could not parse saved config');
-                }
+                    if (!document.getElementById('apiUrl').value && config.apiUrl) document.getElementById('apiUrl').value = config.apiUrl;
+                    if (!document.getElementById('accountId').value && config.accountId) document.getElementById('accountId').value = config.accountId;
+                    if (!document.getElementById('apiToken').value && config.apiToken) document.getElementById('apiToken').value = config.apiToken;
+                    if (state.configSource !== 'url') state.configSource = 'localStorage';
+                } catch (e) {}
             }
 
-            // 3. Try to get context from Chatwoot Dashboard App
+            // Chatwoot Dashboard App context
             setupChatwootListener();
             requestChatwootContext();
-
-            // Show config source badge
             updateConfigSourceBadge();
 
-            // If we have all required fields from URL, auto-load
             if (urlApiUrl && urlAccountId && urlApiToken) {
-                setTimeout(() => {
-                    loadConfiguration();
-                }, 500);
+                setTimeout(() => loadConfiguration(), 500);
             }
         }
 
         function setupChatwootListener() {
             window.addEventListener('message', function(event) {
-                console.log('Received message:', event.data);
-
-                // Handle Chatwoot context
                 if (event.data && typeof event.data === 'object') {
                     if (event.data.event === 'appContext' || event.data.type === 'chatwoot-context') {
                         handleChatwootContext(event.data);
@@ -548,44 +509,22 @@
 
         function requestChatwootContext() {
             try {
-                // Request context from parent (Chatwoot)
                 window.parent.postMessage('chatwoot-dashboard-app:fetch-info', '*');
-                console.log('Requested Chatwoot context');
-
                 showConnectionStatus('Conectando ao Chatwoot...', 'connecting');
-
-                // Timeout - if no response, we're not in Chatwoot
-                setTimeout(() => {
-                    if (!state.chatwootContext) {
-                        hideConnectionStatus();
-                    }
-                }, 3000);
-            } catch (e) {
-                console.log('Not embedded in Chatwoot iframe');
-            }
+                setTimeout(() => { if (!state.chatwootContext) hideConnectionStatus(); }, 3000);
+            } catch (e) {}
         }
 
         function handleChatwootContext(data) {
-            console.log('Chatwoot context received:', data);
             state.chatwootContext = data;
-
-            // Extract useful info
             if (data.data) {
-                const contextData = data.data;
-
-                // Get account_id from conversation
-                if (contextData.conversation && contextData.conversation.account_id) {
-                    document.getElementById('accountId').value = contextData.conversation.account_id;
-                    document.getElementById('accountIdHint').innerHTML =
-                        '<span class="text-green-600">✓ Detectado automaticamente do Chatwoot</span>';
+                if (data.data.conversation && data.data.conversation.account_id) {
+                    document.getElementById('accountId').value = data.data.conversation.account_id;
                 }
-
-                // Get current agent info
-                if (contextData.currentAgent) {
-                    state.currentAgent = contextData.currentAgent;
-                    showAutoConfigBanner(`Agente: ${contextData.currentAgent.name || contextData.currentAgent.email}`);
+                if (data.data.currentAgent) {
+                    state.currentAgent = data.data.currentAgent;
+                    showAutoConfigBanner('Agente: ' + (data.data.currentAgent.name || data.data.currentAgent.email));
                 }
-
                 state.configSource = 'chatwoot';
                 updateConfigSourceBadge();
                 showConnectionStatus('Conectado ao Chatwoot', 'connected');
@@ -597,28 +536,23 @@
             const textEl = document.getElementById('connectionText');
             el.classList.remove('hidden');
             textEl.textContent = text;
-
             const dot = el.querySelector('.w-3');
             if (status === 'connected') {
                 dot.className = 'w-3 h-3 rounded-full bg-green-500';
                 el.className = 'mt-4 p-3 rounded-lg bg-green-50 border border-green-200';
                 textEl.className = 'text-green-700 text-sm';
-            } else if (status === 'connecting') {
+            } else {
                 dot.className = 'w-3 h-3 rounded-full bg-yellow-500 animate-pulse';
                 el.className = 'mt-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200';
                 textEl.className = 'text-yellow-700 text-sm';
             }
         }
 
-        function hideConnectionStatus() {
-            document.getElementById('connectionStatus').classList.add('hidden');
-        }
+        function hideConnectionStatus() { document.getElementById('connectionStatus').classList.add('hidden'); }
 
         function showAutoConfigBanner(details) {
-            const banner = document.getElementById('autoConfigBanner');
-            const detailsEl = document.getElementById('autoConfigDetails');
-            banner.classList.remove('hidden');
-            detailsEl.textContent = details;
+            document.getElementById('autoConfigBanner').classList.remove('hidden');
+            document.getElementById('autoConfigDetails').textContent = details;
         }
 
         function updateConfigSourceBadge() {
@@ -630,71 +564,41 @@
                 'server': { text: 'Admin', color: 'bg-emerald-100 text-emerald-700' },
                 'manual': { text: '', color: '' }
             };
-
             const source = sources[state.configSource];
             if (source.text) {
                 badge.textContent = source.text;
-                badge.className = `text-xs px-2 py-1 rounded-full ml-2 ${source.color}`;
+                badge.className = 'text-xs px-2 py-1 rounded-full ml-2 ' + source.color;
                 badge.classList.remove('hidden');
             }
         }
 
         function toggleTokenVisibility() {
             const input = document.getElementById('apiToken');
-            const icon = document.getElementById('eyeIcon');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>';
-            } else {
-                input.type = 'password';
-                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
-            }
+            input.type = input.type === 'password' ? 'text' : 'password';
         }
 
         // ========================================
         // API FUNCTIONS
         // ========================================
         async function apiRequest(endpoint, method = 'GET', body = null) {
-            let url;
-            let options;
+            let url, options;
 
-            // Se tem CLIENT_CONFIG (veio do admin/slug), usa o proxy para evitar CORS
             if (window.CLIENT_CONFIG) {
-                // Pega o slug da URL (ex: /balboa -> balboa)
                 const pathParts = window.location.pathname.split('/').filter(p => p);
                 const slug = pathParts[0] || '';
-
-                // Usa o proxy do servidor: /api/{slug}/endpoint
-                url = `/api/${slug}${endpoint}`;
-                options = {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                };
+                url = '/api/' + slug + endpoint;
+                options = { method, headers: { 'Content-Type': 'application/json' } };
             } else {
-                // Acesso direto (sem proxy)
-                url = `${state.apiUrl}/api/v1/accounts/${state.accountId}${endpoint}`;
-                options = {
-                    method,
-                    headers: {
-                        'api_access_token': state.apiToken,
-                        'Content-Type': 'application/json'
-                    }
-                };
+                url = state.apiUrl + '/api/v1/accounts/' + state.accountId + endpoint;
+                options = { method, headers: { 'api_access_token': state.apiToken, 'Content-Type': 'application/json' } };
             }
 
-            if (body) {
-                options.body = JSON.stringify(body);
-            }
-
+            if (body) options.body = JSON.stringify(body);
             const response = await fetch(url, options);
-
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`API Error ${response.status}: ${errorText}`);
+                throw new Error('API Error ' + response.status + ': ' + errorText);
             }
-
             return response.json();
         }
 
@@ -703,9 +607,9 @@
             return data.payload || data;
         }
 
-        async function loadFunnels() {
-            const data = await apiRequest('/funnels');
-            return Array.isArray(data) ? data : (data.payload || []);
+        async function loadLabels() {
+            const data = await apiRequest('/labels');
+            return data.payload || data || [];
         }
 
         async function createContact(contactData) {
@@ -716,56 +620,42 @@
             return apiRequest('/conversations', 'POST', conversationData);
         }
 
-        async function moveToKanban(funnelId, conversationId, stageId) {
-            return apiRequest(`/funnels/${funnelId}/kanban/move_conversation`, 'POST', {
-                conversation_id: conversationId,
-                stage_id: stageId
-            });
-        }
-
-        // Criar funnel mapping (vincular conversa ao funil)
-        async function createFunnelMapping(conversationId, funnelId, stageId) {
-            return apiRequest(`/conversations/${conversationId}/funnel_mappings`, 'POST', {
-                funnel_id: funnelId,
-                stage_id: stageId
-            });
-        }
-
-        // Buscar contato por telefone
         async function searchContactByPhone(phone) {
             try {
-                const data = await apiRequest(`/contacts/search?q=${encodeURIComponent(phone)}`);
+                const data = await apiRequest('/contacts/search?q=' + encodeURIComponent(phone));
                 const contacts = data.payload || data || [];
-                // Procura contato com telefone exato
                 return contacts.find(c => {
-                    const contactPhone = (c.phone_number || '').replace(/\D/g, '');
-                    const searchPhone = phone.replace(/\D/g, '');
-                    return contactPhone.includes(searchPhone) || searchPhone.includes(contactPhone);
+                    const cp = (c.phone_number || '').replace(/\D/g, '');
+                    const sp = phone.replace(/\D/g, '');
+                    return cp.includes(sp) || sp.includes(cp);
                 });
-            } catch (error) {
-                console.log('Busca de contato falhou:', error);
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
-        // Criar mensagem privada (nota interna)
+        async function getContactConversations(contactId) {
+            try {
+                const data = await apiRequest('/contacts/' + contactId + '/conversations');
+                return data.payload || data || [];
+            } catch (e) { return []; }
+        }
+
+        async function getConversationLabels(conversationId) {
+            try {
+                const data = await apiRequest('/conversations/' + conversationId + '/labels');
+                return data.payload || data || [];
+            } catch (e) { return []; }
+        }
+
+        async function setConversationLabels(conversationId, labels) {
+            return apiRequest('/conversations/' + conversationId + '/labels', 'POST', { labels: labels });
+        }
+
         async function createPrivateNote(conversationId, content) {
-            return apiRequest(`/conversations/${conversationId}/messages`, 'POST', {
+            return apiRequest('/conversations/' + conversationId + '/messages', 'POST', {
                 content: content,
                 message_type: 'outgoing',
                 private: true
             });
-        }
-
-        // Buscar conversas de um contato
-        async function getContactConversations(contactId) {
-            try {
-                const data = await apiRequest(`/contacts/${contactId}/conversations`);
-                return data.payload || data || [];
-            } catch (error) {
-                console.log('Busca de conversas falhou:', error);
-                return [];
-            }
         }
 
         // ========================================
@@ -785,12 +675,9 @@
                     throw new Error('Preencha todos os campos');
                 }
 
-                // Save config if checkbox is checked
                 if (document.getElementById('saveConfig').checked) {
                     localStorage.setItem('chatwoot_importer_config', JSON.stringify({
-                        apiUrl: state.apiUrl,
-                        accountId: state.accountId,
-                        apiToken: state.apiToken
+                        apiUrl: state.apiUrl, accountId: state.accountId, apiToken: state.apiToken
                     }));
                 }
 
@@ -799,19 +686,17 @@
                 renderInboxes();
                 document.getElementById('inboxesSection').classList.remove('hidden');
 
-                // Mostrar seção de mensagem privada
-                document.getElementById('privateNoteSection').classList.remove('hidden');
-
-                // Load funnels
+                // Load labels
                 try {
-                    state.funnels = await loadFunnels();
-                    if (state.funnels.length > 0) {
-                        renderFunnels();
-                        document.getElementById('funnelsSection').classList.remove('hidden');
-                    }
+                    state.availableLabels = await loadLabels();
+                    renderLabels();
+                    document.getElementById('labelsSection').classList.remove('hidden');
                 } catch (e) {
-                    console.log('Funnels not available:', e);
+                    console.log('Labels not available:', e);
                 }
+
+                // Show advanced options
+                document.getElementById('advancedSection').classList.remove('hidden');
 
                 btn.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Configurado!';
                 btn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
@@ -846,98 +731,79 @@
             updateStep1Button();
         }
 
-        // Helper: converte stages de objeto para array ordenado por position
-        function getStagesArray(stages) {
-            if (!stages) return [];
-            if (Array.isArray(stages)) return stages;
-            // Converte objeto para array: {lead: {...}, proposal: {...}} -> [{key: 'lead', ...}, ...]
-            return Object.entries(stages)
-                .map(([key, value]) => ({ key, ...value, name: value.label || value.name || key }))
-                .sort((a, b) => (a.position || 0) - (b.position || 0));
-        }
+        // ========================================
+        // LABELS
+        // ========================================
+        function renderLabels() {
+            const container = document.getElementById('labelsList');
 
-        // Helper: conta stages (funciona com objeto ou array)
-        function countStages(stages) {
-            if (!stages) return 0;
-            if (Array.isArray(stages)) return stages.length;
-            return Object.keys(stages).length;
-        }
+            if (!state.availableLabels || state.availableLabels.length === 0) {
+                document.getElementById('noLabelsMsg').classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
 
-        function renderFunnels() {
-            const container = document.getElementById('funnelsList');
-            container.innerHTML = state.funnels.map(funnel => `
-                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-purple-50 transition ${state.selectedFunnel?.id === funnel.id ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}">
-                    <input type="radio" name="funnel" value="${funnel.id}" onchange="selectFunnel(${funnel.id})"
-                        ${state.selectedFunnel?.id === funnel.id ? 'checked' : ''}
-                        class="w-5 h-5 text-purple-600">
-                    <div>
-                        <p class="font-medium text-gray-800">${funnel.name}</p>
-                        <p class="text-xs text-gray-500">${countStages(funnel.stages)} etapas</p>
-                    </div>
-                </label>
-            `).join('');
-        }
-
-        function selectFunnel(funnelId) {
-            state.selectedFunnel = state.funnels.find(f => f.id === funnelId);
-            state.selectedStage = null;
-            renderFunnels();
-            renderStages();
-            document.getElementById('stagesSection').classList.remove('hidden');
-        }
-
-        function renderStages() {
-            if (!state.selectedFunnel?.stages) return;
-
-            const container = document.getElementById('stagesList');
-            const stagesArray = getStagesArray(state.selectedFunnel.stages);
-
-            container.innerHTML = stagesArray.map(stage => {
-                // Usa a key do objeto como stageId (ex: "lead", "proposal")
-                const stageId = stage.key || stage.id || stage.position;
-                const isSelected = state.selectedStage?.key === stageId || state.selectedStage?.id === stageId;
+            document.getElementById('noLabelsMsg').classList.add('hidden');
+            container.innerHTML = state.availableLabels.map(label => {
+                const isSelected = state.selectedLabels.includes(label.title);
+                const color = label.color || '#6366f1';
                 return `
-                <label class="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}">
-                    <input type="radio" name="stage" value="${stageId}" onchange="selectStage('${stageId}')"
-                        ${isSelected ? 'checked' : ''}
-                        class="w-4 h-4 text-blue-600">
-                    <span class="w-3 h-3 rounded-full" style="background-color: ${stage.color || '#gray'}"></span>
-                    <span class="text-sm font-medium text-gray-700">${stage.name}</span>
-                </label>
-            `}).join('');
+                    <button type="button" onclick="toggleLabel('${label.title}')"
+                        class="label-chip px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${isSelected
+                            ? 'text-white shadow-md'
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'}"
+                        style="${isSelected ? 'background-color: ' + color + '; border-color: ' + color + ';' : ''}">
+                        ${isSelected ? '✓ ' : ''}${label.title}
+                    </button>
+                `;
+            }).join('');
+
+            updateSelectedLabelsDisplay();
         }
 
-        function selectStage(stageId) {
-            const stagesArray = getStagesArray(state.selectedFunnel.stages);
-            const stage = stagesArray.find(s => s.key === stageId || s.id === stageId);
-            state.selectedStage = {
-                id: stageId,
-                key: stageId,
-                ...stage
-            };
-            renderStages();
-            updateStep1Button();
+        function toggleLabel(title) {
+            const index = state.selectedLabels.indexOf(title);
+            if (index === -1) {
+                state.selectedLabels.push(title);
+            } else {
+                state.selectedLabels.splice(index, 1);
+            }
+            renderLabels();
         }
 
-        // Kanban toggle
-        document.getElementById('enableKanban')?.addEventListener('change', function() {
-            state.enableKanban = this.checked;
-            document.getElementById('kanbanOptions').classList.toggle('hidden', !this.checked);
+        function updateSelectedLabelsDisplay() {
+            document.getElementById('selectedLabelsCount').textContent = state.selectedLabels.length;
+            const container = document.getElementById('selectedLabelsList');
+            if (state.selectedLabels.length === 0) {
+                container.innerHTML = '<span class="text-xs text-gray-400">Nenhuma selecionada</span>';
+            } else {
+                container.innerHTML = state.selectedLabels.map(title => {
+                    const label = state.availableLabels.find(l => l.title === title);
+                    const color = label?.color || '#6366f1';
+                    return '<span class="px-2 py-1 rounded-full text-xs text-white" style="background-color: ' + color + ';">' + title + '</span>';
+                }).join('');
+            }
+        }
+
+        // Enable labels toggle
+        document.getElementById('enableLabels')?.addEventListener('change', function() {
+            state.enableLabels = this.checked;
+            document.getElementById('labelsOptions').classList.toggle('hidden', !this.checked);
             updateStep1Button();
         });
 
-        // Checkbox para não criar duplicados
+        // Skip existing toggle
         document.getElementById('skipExisting')?.addEventListener('change', function() {
             state.skipExisting = this.checked;
         });
 
-        // Checkbox para mensagem privada
+        // Private note toggle
         document.getElementById('enablePrivateNote')?.addEventListener('change', function() {
             state.enablePrivateNote = this.checked;
             document.getElementById('privateNoteOptions').classList.toggle('hidden', !this.checked);
         });
 
-        // Texto da mensagem privada
+        // Private note text
         document.getElementById('privateNoteMessage')?.addEventListener('input', function() {
             state.privateNoteMessage = this.value;
         });
@@ -945,8 +811,7 @@
         function updateStep1Button() {
             const btn = document.getElementById('btnStep2');
             const inboxSelected = state.selectedInbox !== null;
-            const kanbanValid = !state.enableKanban || (state.selectedFunnel && state.selectedStage);
-            btn.disabled = !(inboxSelected && kanbanValid);
+            btn.disabled = !inboxSelected;
         }
 
         // ========================================
@@ -956,29 +821,16 @@
         const fileInput = document.getElementById('fileInput');
 
         dropZone?.addEventListener('click', () => fileInput.click());
-        dropZone?.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-        dropZone?.addEventListener('dragleave', () => {
-            dropZone.classList.remove('drag-over');
-        });
-        dropZone?.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            handleFile(e.dataTransfer.files[0]);
-        });
-        fileInput?.addEventListener('change', (e) => {
-            handleFile(e.target.files[0]);
-        });
+        dropZone?.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone?.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
+        dropZone?.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFile(e.dataTransfer.files[0]); });
+        fileInput?.addEventListener('change', (e) => { handleFile(e.target.files[0]); });
 
         function handleFile(file) {
             if (!file) return;
-
-            const extension = file.name.split('.').pop().toLowerCase();
-
-            if (!['xlsx', 'xls', 'csv'].includes(extension)) {
-                alert('Formato de arquivo nao suportado. Use .xlsx, .xls ou .csv');
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!['xlsx', 'xls', 'csv'].includes(ext)) {
+                alert('Formato nao suportado. Use .xlsx, .xls ou .csv');
                 return;
             }
 
@@ -989,18 +841,15 @@
                     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
                     const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-                    if (jsonData.length < 2) {
-                        throw new Error('Planilha vazia ou sem dados');
-                    }
+                    if (jsonData.length < 2) throw new Error('Planilha vazia ou sem dados');
 
                     state.fileColumns = jsonData[0].map(col => String(col || 'Coluna sem nome'));
                     state.fileData = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== ''));
 
                     document.getElementById('fileName').textContent = file.name;
-                    document.getElementById('fileStats').textContent = `${state.fileData.length} linhas | ${state.fileColumns.length} colunas`;
+                    document.getElementById('fileStats').textContent = state.fileData.length + ' linhas | ' + state.fileColumns.length + ' colunas';
                     document.getElementById('fileInfo').classList.remove('hidden');
                     document.getElementById('btnStep3').disabled = false;
-
                 } catch (error) {
                     alert('Erro ao processar arquivo: ' + error.message);
                 }
@@ -1041,11 +890,7 @@
                 </div>
             `).join('');
 
-            // Initialize mapping with auto-detected values
-            state.fileColumns.forEach(col => {
-                state.mapping[col] = autoDetectField(col);
-            });
-
+            state.fileColumns.forEach(col => { state.mapping[col] = autoDetectField(col); });
             renderPreview();
         }
 
@@ -1069,30 +914,22 @@
         function renderPreview() {
             const mappedFields = Object.entries(state.mapping).filter(([_, v]) => v);
 
-            // Header
-            document.getElementById('previewHeader').innerHTML = `
-                <tr>
-                    ${mappedFields.map(([col, field]) => `
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            ${chatwootFields.find(f => f.value === field)?.label || field}
-                        </th>
-                    `).join('')}
-                </tr>
-            `;
+            document.getElementById('previewHeader').innerHTML = '<tr>' +
+                mappedFields.map(([col, field]) =>
+                    '<th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">' +
+                    (chatwootFields.find(f => f.value === field)?.label || field) + '</th>'
+                ).join('') + '</tr>';
 
-            // Body (show first 5 rows)
             const previewRows = state.fileData.slice(0, 5);
-            document.getElementById('previewBody').innerHTML = previewRows.map(row => `
-                <tr>
-                    ${mappedFields.map(([col, _]) => {
-                        const colIndex = state.fileColumns.indexOf(col);
-                        return `<td class="px-4 py-3 text-sm text-gray-700">${row[colIndex] || '-'}</td>`;
-                    }).join('')}
-                </tr>
-            `).join('');
+            document.getElementById('previewBody').innerHTML = previewRows.map(row => '<tr>' +
+                mappedFields.map(([col, _]) => {
+                    const colIndex = state.fileColumns.indexOf(col);
+                    return '<td class="px-4 py-3 text-sm text-gray-700">' + (row[colIndex] || '-') + '</td>';
+                }).join('') + '</tr>'
+            ).join('');
 
             document.getElementById('previewInfo').textContent =
-                `Mostrando ${Math.min(5, state.fileData.length)} de ${state.fileData.length} registros`;
+                'Mostrando ' + Math.min(5, state.fileData.length) + ' de ' + state.fileData.length + ' registros';
         }
 
         // ========================================
@@ -1113,11 +950,13 @@
             state.importResults = [];
 
             addLog('Iniciando importacao...', 'info');
-            addLog(`Total de registros: ${total}`, 'info');
-            addLog(`Inbox: ${state.selectedInbox.name}`, 'info');
-            if (state.enableKanban) {
-                addLog(`Kanban: ${state.selectedFunnel.name} -> ${state.selectedStage.name}`, 'info');
+            addLog('Total de registros: ' + total, 'info');
+            addLog('Inbox: ' + state.selectedInbox.name, 'info');
+            if (state.enableLabels && state.selectedLabels.length > 0) {
+                addLog('Labels: ' + state.selectedLabels.join(', '), 'info');
             }
+            if (state.skipExisting) addLog('Modo: Nao criar duplicados', 'info');
+            if (state.enablePrivateNote) addLog('Nota privada: Ativada', 'info');
             addLog('─'.repeat(50), 'info');
 
             for (let i = 0; i < state.fileData.length; i++) {
@@ -1133,7 +972,6 @@
                         if (!field) return;
                         const colIndex = state.fileColumns.indexOf(col);
                         const value = row[colIndex];
-
                         if (value !== null && value !== undefined && value !== '') {
                             if (field.startsWith('custom:')) {
                                 customAttributes[field.replace('custom:', '')] = String(value);
@@ -1147,59 +985,57 @@
                         contactData.custom_attributes = customAttributes;
                     }
 
-                    // Format phone number
+                    // Format phone
                     if (contactData.phone_number) {
                         let phone = String(contactData.phone_number).replace(/\D/g, '');
-                        if (phone.length === 11 || phone.length === 10) {
-                            phone = '55' + phone;
-                        }
-                        if (!phone.startsWith('+')) {
-                            phone = '+' + phone;
-                        }
+                        if (phone.length === 11 || phone.length === 10) phone = '55' + phone;
+                        if (!phone.startsWith('+')) phone = '+' + phone;
                         contactData.phone_number = phone;
                     }
 
-                    // Verificar se contato já existe (se opção ativada)
+                    // Check existing contact
                     let contact = null;
                     let contactId = null;
                     let isExisting = false;
-                    const contactName = contactData.name || contactData.phone_number || contactData.email || `Contato ${rowNum}`;
+                    const contactName = contactData.name || contactData.phone_number || contactData.email || 'Contato ' + rowNum;
 
                     if (state.skipExisting && contactData.phone_number) {
-                        const existingContact = await searchContactByPhone(contactData.phone_number);
-                        if (existingContact) {
-                            contact = existingContact;
-                            contactId = existingContact.id;
+                        const existing = await searchContactByPhone(contactData.phone_number);
+                        if (existing) {
+                            contact = existing;
+                            contactId = existing.id;
                             isExisting = true;
-                            addLog(`[${rowNum}/${total}] Contato existente: ${contactName}`, 'info');
+                            addLog('[' + rowNum + '/' + total + '] Contato existente: ' + contactName, 'info');
                         }
                     }
 
-                    // Criar contato se não existir
+                    // Create contact if needed
                     if (!contactId) {
                         contact = await createContact(contactData);
                         contactId = contact.payload?.contact?.id || contact.id;
-                        addLog(`[${rowNum}/${total}] Contato criado: ${contactName}`, 'success');
+                        addLog('[' + rowNum + '/' + total + '] Contato criado: ' + contactName, 'success');
                     }
 
                     let conversationId = null;
 
-                    // Create conversation if Kanban is enabled OR private note is enabled
-                    if ((state.enableKanban || state.enablePrivateNote) && contactId) {
+                    // Create/find conversation if labels or private note are enabled
+                    const needsConversation = (state.enableLabels && state.selectedLabels.length > 0) || state.enablePrivateNote;
+
+                    if (needsConversation && contactId) {
                         try {
-                            // Se contato existente, buscar conversa existente primeiro
+                            // If existing contact, find existing conversation
                             if (isExisting) {
-                                const existingConversations = await getContactConversations(contactId);
-                                if (existingConversations.length > 0) {
-                                    conversationId = existingConversations[0].id;
+                                const existingConvs = await getContactConversations(contactId);
+                                if (existingConvs.length > 0) {
+                                    conversationId = existingConvs[0].id;
                                 }
                             }
 
-                            // Se não tem conversa, criar uma nova
+                            // Create new conversation if needed
                             if (!conversationId) {
                                 const sourceId = contact.payload?.contact?.contact_inboxes?.[0]?.source_id ||
                                                contact.contact_inboxes?.[0]?.source_id ||
-                                               `import_${Date.now()}_${rowNum}`;
+                                               'import_' + Date.now() + '_' + rowNum;
 
                                 const conversation = await createConversation({
                                     inbox_id: state.selectedInbox.id,
@@ -1210,13 +1046,16 @@
                                 conversationId = conversation.id;
                             }
 
-                            // Adicionar ao Kanban se habilitado
-                            if (state.enableKanban && conversationId) {
-                                await createFunnelMapping(conversationId, state.selectedFunnel.id, state.selectedStage.id);
-                                addLog(`   -> Adicionado ao Kanban: ${state.selectedStage.name}`, 'info');
+                            // Add labels if enabled
+                            if (state.enableLabels && state.selectedLabels.length > 0 && conversationId) {
+                                // GET existing labels first, then merge
+                                const existingLabels = await getConversationLabels(conversationId);
+                                const allLabels = [...new Set([...existingLabels, ...state.selectedLabels])];
+                                await setConversationLabels(conversationId, allLabels);
+                                addLog('   -> Labels: ' + state.selectedLabels.join(', '), 'info');
                             }
 
-                            // Criar mensagem privada se habilitado
+                            // Create private note if enabled
                             if (state.enablePrivateNote && conversationId && state.privateNoteMessage) {
                                 const noteContent = state.privateNoteMessage
                                     .replace(/{nome}/gi, contactName)
@@ -1224,13 +1063,12 @@
                                     .replace(/{email}/gi, contactData.email || '')
                                     .replace(/{empresa}/gi, contactData.custom_attributes?.empresa || '')
                                     .replace(/{data}/gi, new Date().toLocaleDateString('pt-BR'));
-
                                 await createPrivateNote(conversationId, noteContent);
-                                addLog(`   -> Nota privada criada`, 'info');
+                                addLog('   -> Nota privada criada', 'info');
                             }
 
-                        } catch (kanbanError) {
-                            addLog(`   ! Erro: ${kanbanError.message}`, 'warning');
+                        } catch (convError) {
+                            addLog('   ! Erro: ' + convError.message, 'warning');
                         }
                     }
 
@@ -1239,55 +1077,44 @@
 
                 } catch (error) {
                     errors++;
-                    addLog(`[${rowNum}/${total}] Erro: ${error.message}`, 'error');
+                    addLog('[' + rowNum + '/' + total + '] Erro: ' + error.message, 'error');
                     state.importResults.push({ row: rowNum, status: 'error', error: error.message });
                 }
 
                 // Update progress
                 const percent = Math.round(((i + 1) / total) * 100);
-                progressBar.style.width = `${percent}%`;
-                progressPercent.textContent = `${percent}%`;
-                progressText.textContent = `Processando ${i + 1} de ${total}...`;
-
+                progressBar.style.width = percent + '%';
+                progressPercent.textContent = percent + '%';
+                progressText.textContent = 'Processando ' + (i + 1) + ' de ' + total + '...';
                 document.getElementById('successCount').textContent = success;
                 document.getElementById('errorCount').textContent = errors;
 
-                // Small delay to avoid rate limiting
                 await new Promise(resolve => setTimeout(resolve, 200));
             }
 
             addLog('─'.repeat(50), 'info');
-            addLog(`Importacao finalizada!`, 'info');
-            addLog(`Sucesso: ${success} | Erros: ${errors}`, success > errors ? 'success' : 'error');
-
+            addLog('Importacao finalizada!', 'info');
+            addLog('Sucesso: ' + success + ' | Erros: ' + errors, success > errors ? 'success' : 'error');
             progressText.textContent = 'Importacao concluida!';
             document.getElementById('btnReset').disabled = false;
             document.getElementById('btnReport').disabled = false;
         }
 
-        function addLog(message, type = 'info') {
+        function addLog(message, type) {
             const log = document.getElementById('importLog');
-            const colors = {
-                info: 'text-blue-400',
-                success: 'text-green-400',
-                error: 'text-red-400',
-                warning: 'text-yellow-400'
-            };
-            log.innerHTML += `<p class="${colors[type]}">[${new Date().toLocaleTimeString()}] ${message}</p>`;
+            const colors = { info: 'text-blue-400', success: 'text-green-400', error: 'text-red-400', warning: 'text-yellow-400' };
+            log.innerHTML += '<p class="' + (colors[type] || 'text-gray-400') + '">[' + new Date().toLocaleTimeString() + '] ' + message + '</p>';
             log.scrollTop = log.scrollHeight;
         }
 
         function downloadReport() {
             const report = state.importResults.map(r => ({
-                Linha: r.row,
-                Status: r.status === 'success' ? 'Sucesso' : 'Erro',
-                Detalhes: r.error || 'OK'
+                Linha: r.row, Status: r.status === 'success' ? 'Sucesso' : 'Erro', Detalhes: r.error || 'OK'
             }));
-
             const ws = XLSX.utils.json_to_sheet(report);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Relatorio');
-            XLSX.writeFile(wb, `importacao_${new Date().toISOString().slice(0,10)}.xlsx`);
+            XLSX.writeFile(wb, 'importacao_' + new Date().toISOString().slice(0,10) + '.xlsx');
         }
 
         // ========================================
@@ -1295,20 +1122,16 @@
         // ========================================
         function updateStepIndicators(currentStep) {
             for (let i = 1; i <= 4; i++) {
-                const indicator = document.getElementById(`step${i}-indicator`);
-                if (i < currentStep) {
-                    indicator.className = 'w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold';
-                } else if (i === currentStep) {
-                    indicator.className = 'w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold';
-                } else {
-                    indicator.className = 'w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-bold';
-                }
+                const ind = document.getElementById('step' + i + '-indicator');
+                if (i < currentStep) ind.className = 'w-10 h-10 bg-green-600 text-white rounded-full flex items-center justify-center font-bold';
+                else if (i === currentStep) ind.className = 'w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold';
+                else ind.className = 'w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-bold';
             }
         }
 
         function showStep(stepNum) {
             for (let i = 1; i <= 4; i++) {
-                document.getElementById(`step${i}`).className = i === stepNum ? 'step-visible fade-in' : 'step-hidden';
+                document.getElementById('step' + i).className = i === stepNum ? 'step-visible fade-in' : 'step-hidden';
             }
             updateStepIndicators(stepNum);
         }
@@ -1316,14 +1139,8 @@
         function goToStep1() { showStep(1); }
         function goToStep2() { showStep(2); }
         function goToStep2Back() { showStep(2); }
-        function goToStep3() {
-            renderMapping();
-            showStep(3);
-        }
-        function goToStep4() {
-            showStep(4);
-            startImport();
-        }
+        function goToStep3() { renderMapping(); showStep(3); }
+        function goToStep4() { showStep(4); startImport(); }
 
         function resetImporter() {
             state.fileData = [];
