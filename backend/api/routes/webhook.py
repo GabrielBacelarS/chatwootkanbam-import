@@ -11,10 +11,18 @@ from backend.core.database import get_db, AsyncSessionLocal
 from backend.models import Client, AIConfig, AIKnowledgeFile, AIConversation, Product, ProductSchema
 from backend.services import ChatwootService, WhisperService, MinioService, AIService
 from backend.services.sales_agent_service import run_sales_agent
+from backend.services.analytics_service import AnalyticsService
 from backend.core.config import settings
 
 router = APIRouter()
 logger = logging.getLogger("IA")
+
+
+def estimate_tokens(text: str) -> int:
+    """Estima numero de tokens baseado no texto (aproximacao: 1 token ~ 4 caracteres)"""
+    if not text:
+        return 0
+    return len(text) // 4
 
 # Tempo de espera padrao para agrupar mensagens (em segundos)
 # Valor pode ser configurado por cliente em ai_config.debounce_seconds
@@ -545,7 +553,62 @@ Se voce responder sobre produtos SEM usar buscar_produtos, voce FALHOU na sua ta
                 return
 
             ai_response = result["response"]
-            logger.info(f"[{slug}] Tools usadas: {result.get('tools_used', [])}")
+            tools_used = result.get('tools_used', [])
+            logger.info(f"[{slug}] Tools usadas: {tools_used}")
+
+            # === REGISTRAR METRICAS DE ANALYTICS ===
+            try:
+                # Estimar tokens (aproximacao baseada em caracteres)
+                tokens_input = estimate_tokens(message + system_prompt)
+                tokens_output = estimate_tokens(ai_response)
+
+                # Extrair IDs de produtos mostrados
+                products_shown = []
+                if "buscar_produtos" in tools_used or "ver_detalhes_produto" in tools_used:
+                    products_shown = [p.id for p in products[:5] if hasattr(p, 'id')]
+
+                # Extrair dados do contato
+                sender = payload.get("sender", {})
+                contact_phone = sender.get("phone_number")
+                contact_name = sender.get("name")
+
+                # Determinar outcome
+                outcome = None
+                if result.get("transfer_requested"):
+                    outcome = "transferred"
+
+                await AnalyticsService.record_conversation_metrics(
+                    db=db,
+                    client_slug=slug,
+                    conversation_id=conversation_id,
+                    tokens_input=tokens_input,
+                    tokens_output=tokens_output,
+                    tools_used=tools_used,
+                    products_shown=products_shown,
+                    channel="whatsapp",  # TODO: detectar canal do Chatwoot
+                    contact_phone=contact_phone,
+                    contact_name=contact_name,
+                    transfer_requested=result.get("transfer_requested", False),
+                    outcome=outcome
+                )
+
+                # Incrementar contador de mensagens
+                await AnalyticsService.increment_message_count(
+                    db=db,
+                    client_slug=slug,
+                    conversation_id=conversation_id,
+                    is_ai_message=False  # Mensagem do usuario
+                )
+                await AnalyticsService.increment_message_count(
+                    db=db,
+                    client_slug=slug,
+                    conversation_id=conversation_id,
+                    is_ai_message=True  # Resposta da IA
+                )
+
+                logger.debug(f"[{slug}] Analytics registrado: {tokens_input}+{tokens_output} tokens")
+            except Exception as analytics_error:
+                logger.warning(f"[{slug}] Erro ao registrar analytics: {analytics_error}")
 
             # Adicionar resposta ao historico
             messages.append({"role": "assistant", "content": ai_response})

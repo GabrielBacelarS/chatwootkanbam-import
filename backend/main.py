@@ -7,6 +7,8 @@ import logging
 from backend.core.config import settings
 from backend.core.database import init_db, engine
 from backend.core.http_client import get_http_client, close_http_client
+from backend.core.rate_limiter import close_redis
+from backend.middleware.rate_limit import RateLimitMiddleware
 from backend.api.routes import api_router
 from backend.api.routes.webhook import router as webhook_router
 
@@ -42,8 +44,9 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     await close_http_client()
+    await close_redis()
     await engine.dispose()
-    logger.info("Aplicação encerrada")
+    logger.info("Aplicacao encerrada")
 
 
 # Criar aplicação FastAPI
@@ -62,6 +65,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Rate Limiting
+if settings.rate_limit_enabled:
+    app.add_middleware(RateLimitMiddleware)
+    logger.info(f"Rate limiting habilitado: {settings.rate_limit_requests_per_minute} req/min")
 
 
 # Error handler global

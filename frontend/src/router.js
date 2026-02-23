@@ -20,6 +20,11 @@ const routes = [
         component: () => import('./views/admin/Dashboard.vue')
       },
       {
+        path: 'analytics',
+        name: 'Analytics',
+        component: () => import('./views/admin/Analytics.vue')
+      },
+      {
         path: 'clientes',
         name: 'Clientes',
         component: () => import('./views/admin/Clientes.vue')
@@ -30,9 +35,29 @@ const routes = [
         component: () => import('./views/admin/ClienteConfig.vue')
       },
       {
+        path: 'ab-testing',
+        name: 'ABTesting',
+        component: () => import('./views/admin/ABTesting.vue')
+      },
+      {
+        path: 'lead-scoring',
+        name: 'LeadScoring',
+        component: () => import('./views/admin/LeadScoring.vue')
+      },
+      {
+        path: 'integrations',
+        name: 'Integrations',
+        component: () => import('./views/admin/Integrations.vue')
+      },
+      {
         path: 'schemas',
         name: 'ProductSchemas',
         component: () => import('./views/admin/ProductSchemas.vue')
+      },
+      {
+        path: 'compliance',
+        name: 'Compliance',
+        component: () => import('./views/admin/Compliance.vue')
       }
     ]
   }

@@ -2,18 +2,19 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.orm import declarative_base
 from backend.core.config import settings
 
-# Converter URL para async
+# Converter URL para async se necessario
 database_url = settings.database_url
 if database_url.startswith("postgresql://"):
     database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
+# PostgreSQL com pool otimizado
 engine = create_async_engine(
     database_url,
-    echo=False,  # Desabilitado para evitar logs excessivos
+    echo=False,
     pool_size=20,
     max_overflow=10,
     pool_pre_ping=True,
-    pool_recycle=300,  # Recicla conexões a cada 5 min
+    pool_recycle=300,
     pool_timeout=30
 )
 

@@ -4,14 +4,22 @@ from backend.core.database import Base
 
 
 class AIConfig(Base):
+    """
+    Configuracao de IA por cliente
+
+    IMPORTANTE: Os campos api_key e openai_key_for_whisper sao armazenados encriptados.
+    Use os metodos get_api_key() e set_api_key() para acessar/modificar.
+    """
     __tablename__ = "ai_config"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     client_slug = Column(String(100), ForeignKey("clients.slug", ondelete="CASCADE"), unique=True)
     enabled = Column(Boolean, default=False)
     provider = Column(String(50), default="openai")
-    api_key = Column(String(500))
-    openai_key_for_whisper = Column(String(500))
+
+    # API Keys armazenadas encriptadas
+    _api_key = Column("api_key", String(500))
+    _openai_key_for_whisper = Column("openai_key_for_whisper", String(500))
     model = Column(String(100), default="gpt-4o-mini")
     system_prompt = Column(Text)
     welcome_message = Column(Text)
@@ -66,6 +74,41 @@ class AIConfig(Base):
 
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    # Properties para encriptacao automatica de API keys
+    @property
+    def api_key(self) -> str:
+        """Retorna API key decriptada"""
+        if not self._api_key:
+            return None
+        from backend.core.encryption import decrypt
+        return decrypt(self._api_key)
+
+    @api_key.setter
+    def api_key(self, value: str):
+        """Armazena API key encriptada"""
+        if not value:
+            self._api_key = None
+            return
+        from backend.core.encryption import encrypt_if_needed
+        self._api_key = encrypt_if_needed(value)
+
+    @property
+    def openai_key_for_whisper(self) -> str:
+        """Retorna OpenAI key para Whisper decriptada"""
+        if not self._openai_key_for_whisper:
+            return None
+        from backend.core.encryption import decrypt
+        return decrypt(self._openai_key_for_whisper)
+
+    @openai_key_for_whisper.setter
+    def openai_key_for_whisper(self, value: str):
+        """Armazena OpenAI key para Whisper encriptada"""
+        if not value:
+            self._openai_key_for_whisper = None
+            return
+        from backend.core.encryption import encrypt_if_needed
+        self._openai_key_for_whisper = encrypt_if_needed(value)
 
     def to_dict(self):
         return {
