@@ -1,0 +1,63 @@
+version: "3.8"
+
+# Apenas banco de dados e Redis para desenvolvimento
+# A aplicacao Python roda localmente com: python run.py
+# Crie um arquivo .env nesta pasta com as credenciais
+
+services:
+  closefy_db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-closefy}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-dev123}
+      - POSTGRES_DB=${POSTGRES_DB:-closefydb}
+      - TZ=America/Sao_Paulo
+    ports:
+      - "5432:5432"
+    volumes:
+      - closefy_pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-closefy}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  closefy_redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - closefy_redis_dev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  closefy_minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-closefy}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-dev123}
+    ports:
+      - "9000:9000"   # API
+      - "9001:9001"   # Console Web
+    volumes:
+      - closefy_minio_dev:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  closefy_pgdata_dev:
+    driver: local
+  closefy_redis_dev:
+    driver: local
+  closefy_minio_dev:
+    driver: local

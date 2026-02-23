@@ -1,4 +1,30 @@
-node_modules/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# Environment
 .env
-nul
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Claude
 .claude/
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Logs
+*.log
