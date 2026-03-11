@@ -1,0 +1,26 @@
+# ====== Stage 1: Build do Frontend ======
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY frontend/package.json frontend/package-lock.json* ./
+RUN npm install
+
+COPY frontend/ ./
+
+# Forcar VITE_API_URL vazio para producao (usa mesmo dominio via nginx proxy)
+ENV VITE_API_URL=""
+RUN npx vite build --outDir dist
+
+# ====== Stage 2: Nginx ======
+FROM nginx:alpine
+
+# Copiar config do nginx
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copiar frontend buildado
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

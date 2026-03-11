@@ -4,10 +4,14 @@ from sqlalchemy import select, delete
 from typing import Optional, List, Any
 from pydantic import BaseModel, field_validator
 from datetime import time
+import re
 import httpx
+import logging
 from backend.core.database import get_db
 from backend.models import Client, AIConfig, AIKnowledgeFile, AIConversation
 from backend.services import AIService, ChatwootService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -51,11 +55,21 @@ class AIConfigUpdate(BaseModel):
     product_keywords: Optional[List[str]] = None  # Keywords que forcam uso de tools (por tipo de negocio)
     debounce_seconds: Optional[float] = None  # Tempo de espera para agrupar mensagens
     intent_detection_mode: Optional[str] = None  # Modo de deteccao: keywords, auto, always
+    # Follow-up automático
+    followup_enabled: Optional[bool] = None
+    followup_max_count: Optional[int] = None
+    followup_delay_hours: Optional[int] = None
+    followup_delay_minutes: Optional[int] = None
+    followup_message_template: Optional[str] = None
 
     @field_validator('working_hours_start', 'working_hours_end', mode='before')
     @classmethod
     def convert_time(cls, v):
         return parse_time(v)
+
+
+class KnowledgeUrlRequest(BaseModel):
+    url: str
 
 
 class AITestRequest(BaseModel):
@@ -100,7 +114,13 @@ async def get_ai_config(slug: str, db: AsyncSession = Depends(get_db)):
             "valores", "opcao", "opcoes", "ver", "mostrar", "conhecer", "saber"
         ],
         "debounce_seconds": 10.0,
-        "intent_detection_mode": "keywords"
+        "intent_detection_mode": "keywords",
+        # Follow-up defaults
+        "followup_enabled": False,
+        "followup_max_count": 3,
+        "followup_delay_hours": 24,
+        "followup_delay_minutes": 0,
+        "followup_message_template": None
     }
 
 
@@ -188,6 +208,86 @@ async def delete_knowledge_file(slug: str, file_id: int, db: AsyncSession = Depe
     await db.delete(file)
     await db.commit()
     return {"message": "Arquivo removido"}
+
+
+def _strip_html(html: str) -> str:
+    """Remove tags HTML e retorna texto limpo"""
+    # Remove script e style tags com conteudo
+    text = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<style[^>]*>.*?</style>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    # Remove tags HTML
+    text = re.sub(r'<[^>]+>', ' ', text)
+    # Decode HTML entities
+    text = text.replace('&nbsp;', ' ').replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+    text = text.replace('&quot;', '"').replace('&#39;', "'")
+    # Limpar espaços extras
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    return text.strip()
+
+
+@router.post("/{slug}/ai-knowledge-url")
+async def add_knowledge_from_url(
+    slug: str,
+    data: KnowledgeUrlRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """Importa conteudo de uma URL externa para a base de conhecimento"""
+    await get_client(slug, db)
+
+    url = data.url.strip()
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
+            response = await client.get(url, headers={
+                "User-Agent": "Mozilla/5.0 (compatible; Closefy/1.0; Knowledge Base Importer)"
+            })
+            response.raise_for_status()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=400, detail=f"Erro ao acessar URL: HTTP {e.response.status_code}")
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=400, detail=f"Erro ao acessar URL: {str(e)}")
+
+    content_type = response.headers.get("content-type", "")
+    raw_content = response.text
+
+    # Extrair texto baseado no content-type
+    if "text/html" in content_type:
+        text_content = _strip_html(raw_content)
+    else:
+        # text/plain, application/json, etc
+        text_content = raw_content
+
+    if not text_content or len(text_content.strip()) < 10:
+        raise HTTPException(status_code=400, detail="URL nao retornou conteudo suficiente")
+
+    # Truncar se muito grande (max 500KB de texto)
+    max_size = 500 * 1024
+    if len(text_content) > max_size:
+        text_content = text_content[:max_size]
+        logger.warning(f"Conteudo de {url} truncado para {max_size} bytes")
+
+    # Extrair nome da pagina da URL
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    page_name = parsed.netloc + parsed.path.rstrip("/")
+    if len(page_name) > 200:
+        page_name = page_name[:200]
+
+    knowledge_file = AIKnowledgeFile(
+        client_slug=slug,
+        filename=page_name,
+        original_name=url,
+        content=text_content,
+        file_size=len(text_content.encode("utf-8")),
+        source_url=url
+    )
+    db.add(knowledge_file)
+    await db.commit()
+    await db.refresh(knowledge_file)
+    return knowledge_file.to_dict()
 
 
 # ===== Teste de IA =====

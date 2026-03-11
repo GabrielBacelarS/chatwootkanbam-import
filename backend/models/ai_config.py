@@ -72,6 +72,14 @@ class AIConfig(Base):
     # Permite que usuario envie varias mensagens seguidas antes da IA responder
     debounce_seconds = Column(Float, default=10.0)
 
+    # ===== Configuracoes de Follow-up Automatico =====
+    # Permite enviar mensagens automaticas quando cliente nao responde
+    followup_enabled = Column(Boolean, default=False)
+    followup_max_count = Column(Integer, default=3)  # Maximo de follow-ups por conversa
+    followup_delay_hours = Column(Integer, default=24)  # Horas de espera
+    followup_delay_minutes = Column(Integer, default=0)  # Minutos de espera (alem das horas)
+    followup_message_template = Column(Text, nullable=True)  # Template opcional, se None usa IA
+
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
@@ -140,5 +148,11 @@ class AIConfig(Base):
                 "valores", "opcao", "opcoes", "ver", "mostrar", "conhecer", "saber"
             ],
             "debounce_seconds": self.debounce_seconds if self.debounce_seconds is not None else 10.0,
-            "intent_detection_mode": self.intent_detection_mode or "keywords"
+            "intent_detection_mode": self.intent_detection_mode or "keywords",
+            # Follow-up settings
+            "followup_enabled": self.followup_enabled if self.followup_enabled is not None else False,
+            "followup_max_count": self.followup_max_count if self.followup_max_count is not None else 3,
+            "followup_delay_hours": self.followup_delay_hours if self.followup_delay_hours is not None else 24,
+            "followup_delay_minutes": self.followup_delay_minutes if self.followup_delay_minutes is not None else 0,
+            "followup_message_template": self.followup_message_template
         }

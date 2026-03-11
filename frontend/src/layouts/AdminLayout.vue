@@ -90,9 +90,17 @@
             <i class="mdi mdi-account"></i>
           </div>
           <div class="user-info" v-show="!sidebarCollapsed">
-            <span class="user-name">Admin</span>
+            <span class="user-name">{{ userEmail }}</span>
             <span class="user-role">Administrador</span>
           </div>
+          <button
+            v-show="!sidebarCollapsed"
+            class="logout-btn"
+            @click="handleLogout"
+            title="Sair"
+          >
+            <i class="mdi mdi-logout"></i>
+          </button>
         </div>
       </div>
     </aside>
@@ -143,13 +151,23 @@
 
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useColors } from 'vuestic-ui'
+import { useAuthStore } from '@/stores/auth'
 import ToastNotification from '@/components/ToastNotification.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
 const { applyPreset } = useColors()
+
+const userEmail = computed(() => auth.email || 'Admin')
+
+function handleLogout() {
+  auth.logout()
+  router.push('/login')
+}
 
 const sidebarCollapsed = ref(false)
 const mobileMenuOpen = ref(false)
@@ -398,17 +416,46 @@ onMounted(async () => {
   .user-info {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
 
     .user-name {
       font-weight: 600;
-      font-size: 0.875rem;
+      font-size: 0.75rem;
       color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .user-role {
       font-size: 0.7rem;
       color: var(--sidebar-text-muted);
     }
+  }
+}
+
+.logout-btn {
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: var(--sidebar-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  i {
+    font-size: 1.125rem;
   }
 }
 

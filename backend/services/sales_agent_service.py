@@ -95,10 +95,27 @@ def buscar_produtos(query: str) -> str:
 
     logger.info(f"[TOOL] buscar_produtos: query='{query}' | Total na base={len(ctx.products)}")
 
-    # Busca por keywords
-    found = RAGService.keyword_search(query, ctx.products)[:5]
+    found = []
 
-    # Fallback: retornar todos se nao encontrou com a busca
+    # Tentar busca por embeddings (RAG) primeiro
+    has_embeddings = any(p.get("embedding") for p in ctx.products)
+    if has_embeddings and ctx.api_key:
+        try:
+            query_embedding = RAGService.generate_embedding_sync(query, ctx.api_key)
+            if query_embedding:
+                found = RAGService.search_similar(query_embedding, ctx.products, top_k=5, threshold=0.3)
+                if found:
+                    logger.info(f"[TOOL] Busca RAG encontrou {len(found)} produtos")
+        except Exception as e:
+            logger.warning(f"[TOOL] Erro na busca RAG: {e}")
+
+    # Fallback: busca por keywords
+    if not found:
+        found = RAGService.keyword_search(query, ctx.products)[:5]
+        if found:
+            logger.info(f"[TOOL] Busca keyword encontrou {len(found)} produtos")
+
+    # Ultimo fallback: retornar todos
     if not found:
         logger.info(f"[TOOL] Busca sem resultado, retornando primeiros {min(5, len(ctx.products))} produtos")
         found = ctx.products[:5]

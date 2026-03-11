@@ -1,0 +1,22 @@
+# Variaveis de ambiente para Stack Closefy no Portainer
+# Copie estas variaveis para as Environment variables da stack no Portainer
+
+# === PostgreSQL ===
+POSTGRES_USER=closefy
+POSTGRES_PASSWORD=sua_senha_forte_aqui
+POSTGRES_DB=closefydb
+
+# === Aplicacao ===
+DEBUG=false
+SESSION_SECRET=gere_uma_string_aleatoria_longa_aqui
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=senha_admin_segura
+
+# === MinIO (Storage de arquivos) ===
+MINIO_ACCESS_KEY=closefy
+MINIO_SECRET_KEY=sua_senha_minio_forte
+
+# === Observacoes ===
+# 1. Gere SESSION_SECRET com: openssl rand -hex 32
+# 2. Use senhas fortes para producao
+# 3. No Portainer: Stacks > Add Stack > Environment variables

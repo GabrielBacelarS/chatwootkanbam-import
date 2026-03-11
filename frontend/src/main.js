@@ -14,8 +14,14 @@ import './styles/main.scss'
 
 const app = createApp(App)
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
+
+// Inicializar auth (restaurar token no axios se ja logado)
+import { useAuthStore } from './stores/auth'
+const authStore = useAuthStore()
+authStore.initAuth()
 
 // Vuestic UI com configuracao de cores e icones
 app.use(createVuestic({

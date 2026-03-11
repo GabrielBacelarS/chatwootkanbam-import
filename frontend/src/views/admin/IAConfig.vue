@@ -307,6 +307,55 @@
           </div>
         </div>
 
+        <div class="form-section">
+          <h3>Follow-up Automatico</h3>
+          <p class="hint-text mb-3">
+            Envia mensagens automaticas quando o cliente nao responde apos um periodo.
+            A IA analisa a conversa e gera um follow-up contextualizado.
+          </p>
+
+          <div class="followup-toggle mb-3">
+            <va-switch v-model="config.followup_enabled" />
+            <span class="toggle-label">{{ config.followup_enabled ? 'Ativado' : 'Desativado' }}</span>
+          </div>
+
+          <div v-if="config.followup_enabled" class="followup-settings">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Maximo de follow-ups</label>
+                <va-input v-model="config.followup_max_count" type="number" :min="1" :max="10" />
+                <small class="hint-text">Quantas mensagens de follow-up enviar por conversa</small>
+              </div>
+              <div class="form-group">
+                <label>Tempo de espera</label>
+                <div class="time-inputs">
+                  <div class="time-input-group">
+                    <va-input v-model="config.followup_delay_hours" type="number" :min="0" :max="168" />
+                    <span class="time-label">horas</span>
+                  </div>
+                  <div class="time-input-group">
+                    <va-input v-model="config.followup_delay_minutes" type="number" :min="0" :max="59" />
+                    <span class="time-label">min</span>
+                  </div>
+                </div>
+                <small class="hint-text">Tempo entre follow-ups</small>
+              </div>
+            </div>
+
+            <div class="form-group mt-3">
+              <label>Mensagem personalizada (opcional)</label>
+              <va-textarea
+                v-model="config.followup_message_template"
+                :min-rows="2"
+                placeholder="Deixe vazio para IA gerar automaticamente com base na conversa..."
+              />
+              <small class="hint-text">
+                Se vazio, a IA analisa a conversa e gera uma mensagem contextualizada.
+              </small>
+            </div>
+          </div>
+        </div>
+
         <div class="form-actions mt-4">
           <va-button @click="saveConfig" :loading="saving">
             <i class="mdi mdi-content-save"></i>
@@ -337,16 +386,37 @@
             </va-file-upload>
           </div>
 
+          <!-- Adicionar URL externa -->
+          <div class="url-import-section">
+            <div class="url-input-row">
+              <va-input
+                v-model="knowledgeUrl"
+                placeholder="https://exemplo.com/pagina"
+                class="flex-1"
+              >
+                <template #prependInner>
+                  <i class="mdi mdi-link-variant" style="color: var(--text-secondary);"></i>
+                </template>
+              </va-input>
+              <va-button size="small" @click="addKnowledgeFromUrl" :loading="importingUrl" :disabled="!knowledgeUrl.trim()">
+                <i class="mdi mdi-plus"></i>
+                Importar
+              </va-button>
+            </div>
+            <small class="hint-text">Importe conteudo de paginas web para a base de conhecimento</small>
+          </div>
+
           <div v-if="knowledgeFiles.length === 0" class="empty-state" style="padding: 1.5rem;">
             <i class="mdi mdi-file-document-outline"></i>
-            <p>Nenhum arquivo carregado</p>
+            <p>Nenhum arquivo ou link carregado</p>
           </div>
 
           <div v-else class="knowledge-list">
             <div v-for="file in knowledgeFiles" :key="file.id" class="knowledge-item">
-              <i class="mdi mdi-file-document-edit"></i>
+              <i :class="file.source_url ? 'mdi mdi-link-variant' : 'mdi mdi-file-document-edit'"></i>
               <div class="flex-1">
                 <span class="font-medium">{{ file.filename }}</span>
+                <small v-if="file.source_url" class="block hint-text url-truncate">{{ file.source_url }}</small>
                 <small class="block hint-text">{{ formatSize(file.file_size) }}</small>
               </div>
               <va-button preset="plain" color="danger" size="small" @click="deleteKnowledge(file.id)">
@@ -496,10 +566,18 @@ const config = ref({
   enabled_tools: ['buscar_produtos', 'calcular_financiamento', 'enviar_imagem', 'agendar_visita', 'transferir_atendimento'],
   product_keywords: ['produto', 'produtos', 'estoque', 'disponivel', 'preco', 'precos', 'quanto', 'valor', 'tem', 'quais'],
   debounce_seconds: 10,
-  intent_detection_mode: 'keywords'
+  intent_detection_mode: 'keywords',
+  // Follow-up settings
+  followup_enabled: false,
+  followup_max_count: 3,
+  followup_delay_hours: 24,
+  followup_delay_minutes: 0,
+  followup_message_template: ''
 })
 
 const knowledgeFiles = ref([])
+const knowledgeUrl = ref('')
+const importingUrl = ref(false)
 const loading = ref(true)
 const saving = ref(false)
 const testing = ref(false)
@@ -670,6 +748,22 @@ const deleteKnowledge = async (fileId) => {
     loadKnowledge()
   } catch (error) {
     toast.error('Erro', 'Falha ao remover')
+  }
+}
+
+const addKnowledgeFromUrl = async () => {
+  if (!knowledgeUrl.value.trim()) return
+  importingUrl.value = true
+  try {
+    await aiApi.addKnowledgeUrl(props.slug, knowledgeUrl.value.trim())
+    toast.success('Sucesso', 'Conteudo importado da URL!')
+    knowledgeUrl.value = ''
+    loadKnowledge()
+  } catch (error) {
+    const detail = error.response?.data?.detail || 'Falha ao importar URL'
+    toast.error('Erro', detail)
+  } finally {
+    importingUrl.value = false
   }
 }
 
@@ -997,6 +1091,26 @@ onMounted(loadData)
     font-size: 0.9rem;
     line-height: 1.7;
   }
+}
+
+// URL Import Section
+.url-import-section {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+
+  .url-input-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.url-truncate {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 // Knowledge List
@@ -1436,6 +1550,52 @@ onMounted(loadData)
     font-weight: 500;
     margin-bottom: 0.5rem;
     display: block;
+  }
+}
+
+// Follow-up Section
+.followup-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+
+  .toggle-label {
+    font-weight: 500;
+    color: var(--text-dark);
+  }
+}
+
+.followup-settings {
+  padding: 1rem;
+  background: var(--surface-light);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  margin-top: 0.5rem;
+}
+
+.time-inputs {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.time-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+
+  .va-input {
+    flex: 1;
+    max-width: 80px;
+  }
+
+  .time-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
   }
 }
 </style>

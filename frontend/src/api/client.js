@@ -18,10 +18,33 @@ const api = axios.create({
 // Se vazio, usa o dominio atual do frontend
 export const getApiBaseUrl = () => API_BASE_URL || window.location.origin
 
-// Interceptor para tratamento de erros
+// Interceptor de request - adiciona token
+api.interceptors.request.use(config => {
+  // Nao sobrescrever se ja tem Authorization (ex: login setou manualmente)
+  if (!config.headers['Authorization']) {
+    const token = localStorage.getItem('auth_token')
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+  }
+  return config
+})
+
+// Interceptor de response - trata erros e 401
 api.interceptors.response.use(
   response => response,
   error => {
+    // Token expirado ou invalido - redirecionar para login
+    if (error.response?.status === 401) {
+      // Nao redirecionar se ja esta na rota de login
+      const isLoginRequest = error.config?.url?.includes('/auth/login')
+      if (!isLoginRequest) {
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('auth_email')
+        window.location.href = '/login'
+        return Promise.reject(error)
+      }
+    }
     console.error('API Error:', error.response?.data || error.message)
     return Promise.reject(error)
   }
@@ -69,7 +92,8 @@ export const aiApi = {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
   },
-  deleteKnowledge: (slug, fileId) => api.delete(`/${slug}/ai-knowledge/${fileId}`)
+  deleteKnowledge: (slug, fileId) => api.delete(`/${slug}/ai-knowledge/${fileId}`),
+  addKnowledgeUrl: (slug, url) => api.post(`/${slug}/ai-knowledge-url`, { url })
 }
 
 // ===== Produtos =====
@@ -148,4 +172,14 @@ export const batchTestingApi = {
       timeout: 300000  // 5 minutos (cada conversa pode levar ~30s)
     }),
   getClientProfiles: (slug) => api.get(`/${slug}/batch-tests/client-profiles`)
+}
+
+// ===== Follow-up Automatico =====
+export const followupApi = {
+  getConfig: (slug) => api.get(`/followup/${slug}/config`),
+  updateConfig: (slug, data) => api.put(`/followup/${slug}/config`, data),
+  listPending: (slug, limit = 50) => api.get(`/followup/${slug}/pending`, { params: { limit } }),
+  getStats: (slug) => api.get(`/followup/${slug}/stats`),
+  cancelJob: (slug, jobId) => api.post(`/followup/${slug}/${jobId}/cancel`),
+  cancelConversation: (slug, conversationId) => api.post(`/followup/${slug}/conversation/${conversationId}/cancel`)
 }

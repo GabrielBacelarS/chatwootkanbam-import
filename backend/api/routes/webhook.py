@@ -12,6 +12,7 @@ from backend.models import Client, AIConfig, AIKnowledgeFile, AIConversation, Pr
 from backend.services import ChatwootService, WhisperService, MinioService, AIService
 from backend.services.sales_agent_service import run_sales_agent
 from backend.services.analytics_service import AnalyticsService
+from backend.services.followup_service import FollowUpService
 from backend.core.config import settings
 
 router = APIRouter()
@@ -149,6 +150,17 @@ async def process_webhook(slug: str, payload: dict):
 
             # === DEBOUNCE: Armazenar mensagem e esperar ===
             await store_pending_message(db, slug, conversation_id, message, attachments)
+
+            # === FOLLOW-UP: Cancelar follow-ups pendentes (cliente respondeu) ===
+            try:
+                await FollowUpService.cancel_pending_followups(
+                    db=db,
+                    client_slug=slug,
+                    conversation_id=conversation_id,
+                    reason="client_responded"
+                )
+            except Exception as followup_error:
+                logger.warning(f"[{slug}] Erro ao cancelar follow-ups: {followup_error}")
 
             # Usar tempo de debounce configurado pelo cliente (ou padrao)
             debounce_time = ai_config.debounce_seconds if ai_config.debounce_seconds is not None else DEFAULT_DEBOUNCE_SECONDS
@@ -434,7 +446,8 @@ async def process_webhook(slug: str, payload: dict):
                     endpoint=settings.minio_endpoint,
                     access_key=settings.minio_access_key,
                     secret_key=settings.minio_secret_key,
-                    secure=settings.minio_secure
+                    secure=settings.minio_secure,
+                    public_endpoint=settings.minio_public_endpoint
                 )
 
                 for p in products:
@@ -659,6 +672,35 @@ Se voce responder sobre produtos SEM usar buscar_produtos, voce FALHOU na sua ta
 
             # Processar transferencia para humano se solicitada
             transfer_requested = result.get("transfer_requested", False)
+
+            # === FOLLOW-UP: Agendar proximo follow-up (se nao houve transferencia) ===
+            if not transfer_requested:
+                try:
+                    # Extrair telefone do contato para o job
+                    sender = payload.get("sender", {})
+                    contact_phone = sender.get("phone_number")
+
+                    await FollowUpService.schedule_followup(
+                        db=db,
+                        client_slug=slug,
+                        conversation_id=conversation_id,
+                        contact_phone=contact_phone,
+                        ai_config=ai_config
+                    )
+                except Exception as followup_error:
+                    logger.warning(f"[{slug}] Erro ao agendar follow-up: {followup_error}")
+            else:
+                # Transferencia solicitada - cancelar follow-ups pendentes
+                try:
+                    await FollowUpService.cancel_pending_followups(
+                        db=db,
+                        client_slug=slug,
+                        conversation_id=conversation_id,
+                        reason="transferred_to_human"
+                    )
+                except Exception as followup_error:
+                    logger.warning(f"[{slug}] Erro ao cancelar follow-ups: {followup_error}")
+
             if transfer_requested:
                 logger.info(f"[{slug}] Transferencia solicitada - transferindo para equipe/humano")
                 try:

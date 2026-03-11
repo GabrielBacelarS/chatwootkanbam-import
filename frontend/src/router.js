@@ -1,7 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  // ===== ÁREA ADMIN =====
+  // Login
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('./views/Login.vue'),
+    meta: { public: true }
+  },
+
+  // ===== AREA ADMIN =====
   {
     path: '/',
     redirect: '/admin/dashboard'
@@ -66,6 +74,29 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// Guard de autenticacao
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('auth_token')
+
+  // Rota publica (login) - se ja logado, redireciona para dashboard
+  if (to.meta.public) {
+    if (token) {
+      next('/admin/dashboard')
+    } else {
+      next()
+    }
+    return
+  }
+
+  // Rota protegida - se nao logado, redireciona para login
+  if (!token) {
+    next('/login')
+    return
+  }
+
+  next()
 })
 
 export default router

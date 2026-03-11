@@ -11,6 +11,7 @@ from backend.models.analytics import ConversationMetrics, DailyStats, ProductAna
 from backend.models.crm_config import CRMConfig
 from backend.models.ab_test import ABTest, ABTestResult as ABTestResultModel
 from backend.models.compliance import Consent, DataRetentionPolicy, DataSubjectRequest, DataProcessingLog
+from backend.models.followup import FollowUpJob
 
 __all__ = [
     "Client",
@@ -32,5 +33,6 @@ __all__ = [
     "Consent",
     "DataRetentionPolicy",
     "DataSubjectRequest",
-    "DataProcessingLog"
+    "DataProcessingLog",
+    "FollowUpJob"
 ]

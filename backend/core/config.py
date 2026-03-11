@@ -26,9 +26,15 @@ class Settings(BaseSettings):
 
     # MinIO (armazenamento de arquivos)
     minio_endpoint: str = "localhost:9000"
+    minio_public_endpoint: Optional[str] = None  # URL publica para presigned URLs (ex: storage.closefy.ai)
     minio_access_key: str = "closefy"
     minio_secret_key: str  # OBRIGATORIO - definir no .env
     minio_secure: bool = False
+
+    # Admin (login unico)
+    admin_email: str = "admin@closefy.ai"
+    admin_password: str = "admin"
+    jwt_secret: Optional[str] = None  # Se None, usa session_secret
 
     # Rate Limiting
     rate_limit_enabled: bool = True

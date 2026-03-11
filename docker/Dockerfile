@@ -1,29 +1,28 @@
-# Dockerfile para FastAPI
+# Dockerfile para FastAPI (backend)
 FROM python:3.11-slim
 
-# Definir diretório de trabalho
 WORKDIR /app
 
-# Instalar dependências do sistema
+# Instalar dependencias do sistema
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar requirements primeiro (cache de dependências)
+# Copiar requirements primeiro (cache de dependencias)
 COPY requirements.txt .
 
-# Instalar dependências Python
+# Instalar dependencias Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar código do backend
+# Copiar codigo do backend
 COPY backend/ ./backend/
 
 # Expor porta
 EXPOSE 3000
 
-# Variáveis de ambiente padrão
+# Variaveis de ambiente padrao
 ENV PORT=3000
 ENV HOST=0.0.0.0
 

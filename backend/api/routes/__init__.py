@@ -1,7 +1,10 @@
 from fastapi import APIRouter
-from backend.api.routes import clients, chatwoot_proxy, ai, webhook, products, schemas, batch_testing, analytics, integrations, ab_testing, compliance, lead_scoring
+from backend.api.routes import auth, clients, chatwoot_proxy, ai, webhook, products, schemas, batch_testing, analytics, integrations, ab_testing, compliance, lead_scoring, followup
 
 api_router = APIRouter()
+
+# Auth (publico - sem protecao)
+api_router.include_router(auth.router, tags=["auth"])
 
 # Rotas de schemas (superadmin) - ANTES de tudo
 api_router.include_router(schemas.router, tags=["schemas"])
@@ -38,3 +41,6 @@ api_router.include_router(chatwoot_proxy.router, tags=["chatwoot"])
 
 # Rotas de Lead Scoring
 api_router.include_router(lead_scoring.router, prefix="/lead-scoring", tags=["lead-scoring"])
+
+# Rotas de Follow-up Automatico
+api_router.include_router(followup.router, prefix="/followup", tags=["followup"])

@@ -4,7 +4,7 @@ from sqlalchemy import select, delete
 from typing import List, Optional
 from pydantic import BaseModel
 from backend.core.database import get_db
-from backend.models import Client
+from backend.models import Client, AIConfig
 
 router = APIRouter()
 
@@ -29,7 +29,18 @@ async def list_clients(db: AsyncSession = Depends(get_db)):
     """Lista todos os clientes"""
     result = await db.execute(select(Client))
     clients = result.scalars().all()
-    return {client.slug: client.to_dict() for client in clients}
+
+    # Buscar status da IA para cada cliente
+    ai_result = await db.execute(select(AIConfig))
+    ai_configs = {ac.client_slug: ac.enabled for ac in ai_result.scalars().all()}
+
+    clients_dict = {}
+    for client in clients:
+        d = client.to_dict()
+        d["ai_enabled"] = ai_configs.get(client.slug, False)
+        clients_dict[client.slug] = d
+
+    return clients_dict
 
 
 @router.get("/{slug}")

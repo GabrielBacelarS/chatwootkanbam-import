@@ -11,6 +11,7 @@ class AIKnowledgeFile(Base):
     original_name = Column(String(255), nullable=False)
     content = Column(Text)
     file_size = Column(Integer)
+    source_url = Column(String(2000), nullable=True)  # URL de origem (se importado de link externo)
     created_at = Column(DateTime, server_default=func.now())
 
     def to_dict(self):
@@ -20,5 +21,6 @@ class AIKnowledgeFile(Base):
             "filename": self.filename,
             "original_name": self.original_name,
             "file_size": self.file_size,
+            "source_url": self.source_url,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }

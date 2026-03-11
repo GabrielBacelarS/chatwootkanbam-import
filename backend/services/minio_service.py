@@ -17,14 +17,29 @@ class MinioService:
         endpoint: str = "localhost:9000",
         access_key: str = "closefy",
         secret_key: str = "Closefy2026!!",
-        secure: bool = False
+        secure: bool = False,
+        public_endpoint: str = None
     ):
+        self.endpoint = endpoint
+        self.secure = secure
+        self.public_endpoint = public_endpoint
         self.client = Minio(
             endpoint,
             access_key=access_key,
             secret_key=secret_key,
             secure=secure
         )
+        # Client separado para gerar presigned URLs com o endpoint publico
+        # Necessario porque a assinatura S3 inclui o header Host
+        if public_endpoint:
+            self.public_client = Minio(
+                public_endpoint,
+                access_key=access_key,
+                secret_key=secret_key,
+                secure=True
+            )
+        else:
+            self.public_client = None
         self.default_bucket = "closefy-knowledge"
 
     def ensure_bucket(self, bucket_name: str = None) -> bool:
@@ -120,7 +135,9 @@ class MinioService:
         """Gera URL pré-assinada para acesso temporário"""
         bucket = bucket_name or self.default_bucket
         try:
-            url = self.client.presigned_get_object(bucket, object_name, expires=expires)
+            # Usar client publico para gerar URLs com assinatura correta
+            client = self.public_client or self.client
+            url = client.presigned_get_object(bucket, object_name, expires=expires)
             return url
         except S3Error as e:
             logger.error(f"Erro ao gerar URL: {e}")

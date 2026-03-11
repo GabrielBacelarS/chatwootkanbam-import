@@ -1,4 +1,4 @@
-from openai import AsyncOpenAI
+from openai import AsyncOpenAI, OpenAI
 from typing import Optional, List, Dict, Any
 import numpy as np
 import logging
@@ -52,6 +52,21 @@ class RAGService:
 
         except Exception as e:
             logger.error(f"Erro ao gerar embedding: {e}")
+            return None
+
+    @staticmethod
+    def generate_embedding_sync(
+        text: str,
+        api_key: str,
+        model: str = "text-embedding-3-small"
+    ) -> Optional[List[float]]:
+        """Gera embedding de forma sincrona (para uso em tools do LangChain)"""
+        try:
+            client = OpenAI(api_key=api_key)
+            response = client.embeddings.create(model=model, input=text)
+            return response.data[0].embedding
+        except Exception as e:
+            logger.error(f"Erro ao gerar embedding (sync): {e}")
             return None
 
     @staticmethod
